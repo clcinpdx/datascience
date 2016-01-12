@@ -1,0 +1,23 @@
+1. What is the problem you want to solve?
+
+To predict whether a person is a good or bad candidate for a loan, and secondarily what the appropriate interest rate is for the person should they be granted a loan.
+
+
+2. Who is your client and why do they care about this problem? In other words, what will your client DO or DECIDE based on your analysis that they wouldn’t have otherwise?
+
+The client is a bank who wants to predict whether a potential customer should be a good or bad loan candidate, and secondarily what the appropriate interest rate should be offered to the client in either case.
+
+
+3. What data are you going to use for this? How will you acquire this data?
+
+https://github.com/h2oai/app-consumer-loan/tree/master/data/loan.csv
+
+
+In brief, outline your approach to solving this problem (knowing that this might change later).
+
+Inspired by: https://www.youtube.com/watch?v=qETo6sYBJzU
+
+
+
+
+What are your deliverables? Typically, this would include code, along with a paper and/or a slide deck.
