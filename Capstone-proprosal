@@ -38,20 +38,25 @@ longest_credit_length
 verification_status
 
 In summary, each row captures information about a consumer and the column "bad_loan" captures if the consumer
-was either a good or bad loan. 
+was either a good or bad loan. This data is unevenly split between good and bad loans:
+Good Loans (0): 133,971 observations
+Bad Loans (1): 30,016 observations
 
 The original data can be downloaded at <https://www.lendingclub.com/info/download-data.action> and it is 
-all the data from 2007 to June 30, 2015.  This does not incorporate the declined loan data set which does 
-not have the same feature set.  
+all the data from 2007 to September 30, 2015. The Lending Club site also publishes a second data set that contains the 
+declined loan data set (which does not have the same feature set) but may be needed for this analysis.  
 
 
 4. In brief, outline your approach to solving this problem (knowing that this might change later).
 
-The first step will be to build a model that predicts whether a customer should be approved or denied a loan (e.g. Yes/No or 1/0) 
-based on the historical data provided in the loan.csv data set.
+The first step will be to fit and predict using different classes of models to determine whether a customer should be approved or denied a loan (e.g. Yes/No or 1/0) 
+based on the historical data provided in the loan.csv data set. 
 
-To accomplish this the data set will be divided into a training set and a testing set. Models shall be developed and tested 
-that that provide the best fit and minimize Type 1 and Type 2 error.
+To accomplish this the data set will be divided into a training set and a testing set. 
+
+Models shall be developed and tested that that provide the best fit and minimize Type 1 and Type 2 error. 
+The cuttoff (AKA transition from good to bad) shall be adjusted so as to minimize the type 1 and 2 errors.
+
 
 
 5. What are your deliverables? Typically, this would include code, along with a paper and/or a slide deck.
