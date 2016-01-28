@@ -1,0 +1,62 @@
+1. What is the problem you want to solve?
+
+To predict whether a person is a good or bad candidate for a loan, and secondarily an appropriate interest rate 
+for the person given their likelihood of default.
+
+
+2. Who is your client and why do they care about this problem? In other words, what will your client DO or DECIDE based on your analysis that they wouldn’t have otherwise?
+
+The client is a bank who requires a model that will 
+
+a) predict whether a potential customer is a good or bad loan candidate based on attributes such as employment length, whether they own a home, what their annual income is, what purpose is the loan, what state they
+live in, etc. This will require the identification of a threshold beyond which the customer transitions to a bad loan candidate.
+
+b) determine the appropriate interest rate that should be offered to the client based on their likelihood to repay the loan (or not, 
+as the case may be).
+
+
+3. What data are you going to use for this? How will you acquire this data?
+
+https://github.com/h2oai/app-consumer-loan/tree/master/data/loan.csv
+
+loan.csv contains 163,987 rows. The following data exists for each observation: 
+
+loan_amnt
+term
+int_rate
+emp_length
+home_ownership
+annual_inc
+purpose
+addr_state
+dti
+delinq_2yrs
+revol_util
+total_acc
+bad_loan
+longest_credit_length
+verification_status
+
+In summary, each row captures information about a consumer and the column "bad_loan" captures if the consumer
+was either a good or bad loan. This data is unevenly split between good and bad loans:
+Good Loans (0): 133,971 observations
+Bad Loans (1): 30,016 observations
+
+The original data can be downloaded at <https://www.lendingclub.com/info/download-data.action> and it is 
+all the data from 2007 to September 30, 2015. The Lending Club site also publishes a second data set that contains the 
+declined loan data set (which does not have the same feature set) but may be needed for this analysis.  
+
+
+4. In brief, outline your approach to solving this problem (knowing that this might change later).
+
+The first step will be to fit and predict using different classes of models to determine whether a customer should be approved or denied a loan (e.g. Yes/No or 1/0) 
+based on the historical data provided in the loan.csv data set. 
+
+To accomplish this the data set will be divided into a training set and a testing set. 
+
+Models shall be developed and tested that that provide the best fit and minimize Type 1 and Type 2 error. 
+The cuttoff (AKA transition from good to bad) shall be adjusted so as to minimize the type 1 and 2 errors.
+
+
+
+5. What are your deliverables? Typically, this would include code, along with a paper and/or a slide deck.
