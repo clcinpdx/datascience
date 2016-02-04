@@ -28,4 +28,15 @@ setwd ('C:/Users/crcalder/Google Drive/eBay/Data-Science/datascience/udacity')
 pf <- read.csv('pseudo_facebook.tsv',sep = '\t')
 
 glimpse(pf)
+
 ############################################################
+
+# The linetype parameter can take the values 0-6:
+# 0 = blank, 1 = solid, 2 = dashed
+# 3 = dotted, 4 = dotdash, 5 = longdash
+# 6 = twodash
+
+############################################################
+# http://www.statmethods.net/input/datatypes.html
+
+
