@@ -1,0 +1,485 @@
+demo()
+install.packages("~/R/win-library/3.2/UScensus2010_0.11.zip", repos = NULL, type = "win.binary")
+a <- 1
+b <- 1:10
+plot (x=1:10,y=2:11)
+library(ggplot2)
+demo()
+library(Hershey)
+library(graphics)
+tabl_df(Hershey)
+suppressMessages(library(dplyr))
+install.packages("C:/Users/crcalder/Downloads/dplyr-0.4.3.zip", repos = NULL, type = "win.binary")
+suppressMessages(library(dplyr))
+.libPaths()
+install.packages("C:/Users/crcalder/Downloads/dplyr-0.4.3.zip", repos = NULL, type = "win.binary")
+library("ggplot2", lib.loc="~/R/win-library/3.2")
+install.packages("ggplot2")
+library("gridExtra", lib.loc="~/R/win-library/3.2")
+install.packages("gridExtra")
+library("dplyr", lib.loc="~/R/win-library/3.2")
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("gridExtra")
+install.packages("dplyr")
+ggplot (aes(x = age_with_months, y = friend_count_mean), data = subset(pf.age_with_months, pf.age_with_months < 71))) +
+geom_line()
+ggplot (aes(x = age_with_months, y = friend_count_mean),
+data = subset(pf.age_with_months, pf.age < 71))) +
+geom_line()
+ggplot (aes(x = age_with_months, y = friend_count_mean),
+data = subset(pf.age_with_months, age_with_months < 71)) +
+geom_line()
+ggplot (aes(x = age_with_months, y = friend_count_mean),
+data = subset(pf.age_with_months, age_with_months < 71)) +
+geom_line()
+ggplot (aes(x = age_with_months, y = friend_count_mean),
+data = subset(pf.fc_by_age_months, age_with_months < 71)) +
+geom_line()
+head(pf.fc_by_age_months)
+pf.fc_by_age_months <- pf %>%
+group_by(age_with_months) %>%
+summarize (friend_count_mean = mean(friend_count),
+friend_count_median = median(friend_count),
+n = n()) %>%
+arrange(age_with_months)
+library("ggplot2", lib.loc="~/R/win-library/3.2")
+install.packages("ggplot2")
+library("gridExtra", lib.loc="~/R/win-library/3.2")
+install.packages("gridExtra")
+library("dplyr", lib.loc="~/R/win-library/3.2")
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("gridExtra")
+pf.fc_by_age_months <- pf %>%
+group_by(age_with_months) %>%
+summarize (friend_count_mean = mean(friend_count),
+friend_count_median = median(friend_count),
+n = n()) %>%
+arrange(age_with_months)
+install.packages("dplyr")
+pf.fc_by_age_months <- pf %>%
+group_by(age_with_months) %>%
+summarize (friend_count_mean = mean(friend_count),
+friend_count_median = median(friend_count),
+n = n()) %>%
+arrange(age_with_months)
+library("dplyr", lib.loc="~/R/win-library/3.2")
+library("ggplot2", lib.loc="~/R/win-library/3.2")
+library("gridExtra", lib.loc="~/R/win-library/3.2")
+pf.fc_by_age_months <- pf %>%
+group_by(age_with_months) %>%
+summarize (friend_count_mean = mean(friend_count),
+friend_count_median = median(friend_count),
+n = n()) %>%
+arrange(age_with_months)
+pf$age_with_months <- pf$age + (1 - (pf$dob_month/12))
+rm (pf.age_with_months)
+pf$age_with_months <- pf$age + (1 - (pf$dob_month/12))
+ggplot (aes(x=age, y = median_friend_count),
+data = subset(pf.fc_by_age_gender, !is.na(gender))) +
+geom_line( aes(color = gender))
+library("ggplot2", lib.loc="~/R/win-library/3.2")
+library("gridExtra", lib.loc="~/R/win-library/3.2")
+library("dplyr", lib.loc="~/R/win-library/3.2")
+ggplot (aes(x=age, y = median_friend_count),
+data = subset(pf.fc_by_age_gender, !is.na(gender))) +
+geom_line( aes(color = gender))
+setwd ('C:/Users/crcalder/Google Drive/eBay/Data-Science/datascience/udacity')
+pf <- read.csv('pseudo_facebook.tsv',sep = '\t')
+ggplot (aes(x=age, y = median_friend_count),
+data = subset(pf.fc_by_age_gender, !is.na(gender))) +
+geom_line( aes(color = gender))
+pf.fc_by_age_gender <- pf %>%
+filter (!is.na(gender)) %>%
+group_by(age,gender) %>%
+summarize (mean_friend_count = mean(friend_count),
+median_friend_count = median(friend_count),
+n = n()) %>%
+ungroup () %>%
+arrange(age)
+ggplot (aes(x=age, y = median_friend_count),
+data = subset(pf.fc_by_age_gender, !is.na(gender))) +
+geom_line( aes(color = gender))
+ggplot (aes(x=age, y = median_friend_count),
+data = pf.fc_by_age_gender) +
+filter (!is.na(gender)) %>%
+geom_line( aes(color = gender))
+head(pf.fc_by_age_gender)
+install.packages('reshape2')
+library(reshape2)
+pf.fc_by_age_gender.wide <- dcast (pf.fc_by_age_gender,
+age ~ gender,
+value.var = 'median_friend_count')
+View(pf.fc_by_age_gender.wide)
+geom_hline (aes(yintercept=mpg),linetype = 2)
+geom_hline (aes(yintercept=1),linetype = 2)
+ggplot (aes(x=age, y = median_friend_count),
+data = subset(pf.fc_by_age_gender.wide, !is.na(gender))) +
+geom_line( aes(color = gender)) +
+geom_hline (aes(yintercept=1),linetype = 2)
+ggplot (aes(x=age, y = median_friend_count),
+data = pf.fc_by_age_gender.wide) +
+geom_line( aes(color = gender)) +
+geom_hline (aes(yintercept=1),linetype = 2)
+ggplot (aes(x=age, y = median_friend_count),
+data = pf.fc_by_age_gender.wide) +
+geom_line()) +
+geom_hline (aes(yintercept=1),linetype = 2)
+ggplot (aes(x=age, y = median_friend_count),
+data = pf.fc_by_age_gender.wide) +
+geom_line() +
+geom_hline (aes(yintercept=1),linetype = 2)
+View(pf.fc_by_age_gender.wide)
+ggplot (aes(x=age, y = (female/male) ),
+data = pf.fc_by_age_gender.wide) +
+geom_line() +
+geom_hline (aes(yintercept=1),linetype = 2)
+ggplot (aes(x=age, y = (female/male) ),
+data = pf.fc_by_age_gender.wide) +
+geom_line(color=red) +
+geom_hline (aes(yintercept=1),linetype = 2)
+ggplot (aes(x=age, y = (female/male) ),
+data = pf.fc_by_age_gender.wide) +
+geom_line(aes(color=red)) +
+geom_hline (aes(yintercept=1),linetype = 2)
+ggplot (aes(x=age, y = (female/male) ),
+data = pf.fc_by_age_gender.wide) +
+geom_line(aes(color='red')) +
+geom_hline (aes(yintercept=1),linetype = 2)
+glimpse (pf)
+summarise(pf.tenure)
+summarise(pf$tenure)
+pf$year_joined <- round(2014 - (pf$tenure / 365))
+head(pf)
+pf$year_joined <- ceiling(2014 - (pf$tenure / 365))
+head(pf)
+pf$year_joined <- floor(2014 - (pf$tenure / 365))
+head(pf)
+class(pf$tenure)
+class(pf$year_joined)
+pf.year_joined.bucket <- cut (as.numeric(pf$year_joined),
+breaks = c((2004, 2009], (2009, 2011], (2011, 2012], (2012, 2014])
+pf.year_joined.bucket <- cut (as.numeric(pf$year_joined),
+breaks = c(2004,2009,2011,2012,2014))
+table (pf.year_joined.bucket)
+ggplot(aes(x = age, y = friend_count),
+data = subset(pf, !is.na(gender))) +
+geom_line(aes(color = pf.year_joined.bucket), stat = 'summary', fun.y = median)
+glimpse (pf.year_joined.bucket)
+glimpse (pf.year_joined)
+glimpse (pf)
+ggplot(aes(x = age, y = friend_count),
+data = pf) +
+geom_line(aes(color = pf.year_joined.bucket), stat = 'summary', fun.y = median)
+ggplot(aes(x = age, y = friend_count), data = pf) +
+geom_line(aes(color = pf.year_joined.bucket),
+stat = 'summary', fun.y = mean) +
+geom_line(aes(color = 'red', linetype = 2)) stat = 'summary', fun.y = mean)
+ggplot(aes(x = age, y = friend_count), data = pf) +
+geom_line(aes(color = pf.year_joined.bucket),
+stat = 'summary', fun.y = mean) +
+geom_line(aes(color = red, linetype = 2)) stat = 'summary', fun.y = mean)
+ggplot(aes(x = age, y = friend_count), data = pf) +
+geom_line(aes(color = pf.year_joined.bucket),
+stat = 'summary', fun.y = mean) +
+geom_line(aes(color = red, linetype = 2)), stat = 'summary', fun.y = mean)
+ggplot(aes(x = age, y = friend_count), data = pf) +
+geom_line(aes(color = pf.year_joined.bucket),
+stat = 'summary', fun.y = mean) +
+geom_line(aes(color = red, linetype = 2), stat = 'summary', fun.y = mean)
+ggplot(aes(x = age, y = friend_count), data = pf) +
+geom_line(aes(color = pf.year_joined.bucket),
+stat = 'summary', fun.y = mean) +
+geom_line(color = red, linetype = 2, stat = 'summary', fun.y = mean)
+ggplot(aes(x = age, y = friend_count), data = pf) +
+geom_line(aes(color = pf.year_joined.bucket),
+stat = 'summary', fun.y = mean) +
+geom_line(linetype = 2, stat = 'summary', fun.y = mean)
+pf %>%
+filter (!is.na(tenure)) %>%
+pf.friend_rate <- (friend_count / tenure) %>%
+summarize (mean_friending_rate = mean(pf.friend_rate),
+median_friend_count = median(pf.friend_rate),
+n = n())
+pf %>%
+filter (!is.na(tenure)) %>%
+pf.friend_rate <- (pf$friend_count / pf$tenure) %>%
+summarize (mean_friending_rate = mean(pf.friend_rate),
+median_friend_count = median(pf.friend_rate),
+n = n())
+pf.friend_rate <- pf %>%
+filter (!is.na(tenure)) %>%
+group_by(tenure) %>%
+summarize (friend_count_mean = mean(friend_count),
+friend_count_median = median(friend_count),
+n = n()) %>%
+arrange(tenure)
+head(pf.friend_rate)
+summary (pf.friend_rate)
+with (subset(pf, pf$tenure > 0), cor.test(tenure, friend_count, method='pearson'))
+with (subset(pf, pf$tenure > 0), summary(friend_count/tenure))
+library("tidyr", lib.loc="~/R/win-library/3.2")
+with (pf, summary())
+glimpse (ln)
+setwd ('C:/Users/crcalder/Google Drive/eBay/Data-Science/datascience/')
+ln <- read.csv('loan.tsv',sep = '\t')
+ln <- read.csv('loan.csv',sep = '\t')
+glimpse (ln)
+ln <- read.csv('loan.csv')
+glimpse (ln)
+summary (ln)
+setwd ('C:/Users/crcalder/Google Drive/eBay/Data-Science/datascience/UCI HAR Dataset')
+testX <- read.txt('/test/X_test')
+testX <- read.csv('/test/X_test')
+testX <- read.csv('/test/X_test.txt')
+testX <- read.csv('test/X_test.txt')
+glimpse (textX)
+testX <- read.csv('test/X_test.txt')
+trainX <- read.csv('train/X_test.txt')
+trainX <- read.csv('train/X_train.txt')
+# load loan data
+glimpse (textX)
+glimpse (testX)
+head (testX)
+testLabel <- read.csv('test/y_test.txt', header=FALSE)
+colnames(testX) <- testLabel
+colnames(testX) <- testLabel
+colnames(testX) <- c(testLabel)
+head (testX)
+rm(testX)
+testX <- read.csv('test/X_test.txt', header=FALSE)
+rm(testX)
+testX <- read.csv('test/X_test.txt',sep="\t", header=FALSE)
+rm(testX)
+testLabel <- read.csv('test/y_test.txt',sep="\t", header=FALSE)
+View(testLabel)
+testLabel <- read.csv('test/y_test.txt',sep="\t", header=FALSE)
+View(testLabel)
+View(trainX)
+ds <- read.csv('activity_labels.txt',sep="\t", header=TRUE) %>%
+read.csv('test/X_test.txt',sep="\t", header=FALSE) %>%
+read.csv('train/X_train.txt', header=FALSE)
+ds <- read.csv('activity_labels.txt',sep="\t", header=TRUE) +
+read.csv('test/X_test.txt',sep="\t", header=FALSE) +
+read.csv('train/X_train.txt', header=FALSE)
+ds <- read.csv('activity_labels.txt',sep="\t", header=TRUE) +
+read.csv('test/X_test.txt',header=FALSE) +
+read.csv('train/X_train.txt',header=FALSE)
+ds <- read.csv('activity_labels.txt') +
+read.csv('test/X_test.txt',header=FALSE) +
+read.csv('train/X_train.txt',header=FALSE)
+rm(testX)
+rm(ds)
+rm(trainX)
+rm(testLabel)
+ds <- read.csv('activity_labels.txt',header=TRUE)
+ds <- read.csv('activity_labels.txt',sep = '/t', header=TRUE)
+ds <- read.csv('activity_labels.txt',sep = "\t", header=TRUE)
+ds <- read.table('activity_labels.txt',sep = "\t", header=TRUE)
+rm(ds)
+ds <- read.table('activity_labels.txt',sep = "\t", header=TRUE)
+ds <- read.table('test/X_test.txt',sep = " ", header=FALSE)
+ds <- read.table('test/X_test.txt',sep = "/t", header=FALSE)
+ds <- read.table('test/X_test.txt',sep = "\t", header=FALSE)
+tbl_df(ds)
+?gather
+gather(df,1:128)
+activity_labels <- read.csv('activity_labels.txt',sep = "\t", header=FALSE)
+glimpse (activity_labels)
+features <- read.csv('features.txt',sep = "\t", header=FALSE)
+subject_test <- read.table('test/subject_test.txt',sep = "\t", header=FALSE)
+X_test <- read.table('test/X_test.txt',sep = "\t", header=FALSE)
+y_test <- read.table('test/y_test.txt',sep = "\t", header=FALSE)
+subject_train <- read.table('test/subject_train.txt',sep = "\t", header=FALSE)
+X_train <- read.table('train/X_train.txt',sep = "\t", header=FALSE)
+y_train <- read.table('train/y_traing.txt',sep = "\t", header=FALSE)
+subject_train <- read.table('train/subject_train.txt',sep = "\t", header=FALSE)
+y_train <- read.table('train/y_train.txt',sep = "\t", header=FALSE)
+glimpse(activity_labels)
+separate (activity_labels,c("ActivityLabel","ActivityName"), sep = ",")
+df <- merge(subject_test,X_test,y_test)
+df <- bind_cols (subject_test,X_test,y_test)
+rm(df)
+td <- bind_cols (subject_test,X_test,y_test)
+rm(td)
+traind <- bind_cols (subject_train,X_train,y_train)
+testd <- bind_cols (subject_test,X_test,y_test)
+combod <- bind_rows (testd,traind)
+glimpse (testd)
+spread (subject_test)
+spread (subject_test,V1)
+rename (subject_test,V1 = "Subject")
+rename (subject_test,V1 = Subject)
+rename (subject_test,V1 = 'Subject')
+glimpse (subject_test)
+rename (subject_test, V1 = subject)
+spread (subject_test,subject)
+?subject
+?spread
+glimpse (subject_train)
+View(X_test)
+cbind (subject_test, y_test, X_test)
+test_dc <- cbind (subject_test, y_test, X_test)
+train_dc <- cbind (subject_train, y_train, X_train)
+View(testd)
+View(test_dc)
+View(features)
+temp <- cbind (X_test)
+separate (temp,col = temp[1])
+temp2 <- separate (temp,col = temp[1])
+colnames(temp) <- c("data")
+glimpse (temp)
+colnames (activity_labels) <- c ("activity_label")
+glimpse (activity_labels)
+rm(activity_labels)
+activity_labels <- read.csv('activity_labels.txt',sep = "\t", header=FALSE) +
+colnames (activity_labels) <- c ("activity_label")
+features <- read.table('features.txt',sep = "\t", header=FALSE) %>%
+colnames () <- c ("features")
+colnames (X_test) <- c ("X_test")
+colnames (subject_test) <- c ("subject_test")
+colnames (y_test) <- c ("y_test")
+rm(test_dc)
+test_dc <- cbind (subject_test, y_test, X_test)
+glimpse (test_dc)
+colnames(temp) <- data
+?spread
+rm(test)
+rm(temp)
+temp <- X_test
+temp2 <- spread (temp,X_test)
+glimpse (X_test)
+temp2 <- spread (temp,X_test,1:561)
+spread (features,features)
+?strsplit
+split (features,features)
+glimpse (features)
+features <- split (features,features)
+glimpse (features)
+jd1 <- data.frame(features[','])
+temp3 <- separate(features, features)
+glimpse (features)
+features <- read.table('features.txt',sep = "\t", header=FALSE)
+colnames (features) <- c ("features")
+glimpse (features)
+features <- separate (features,features)
+features <- separate (features,features,",")
+features <- separate (features,c(features),",")
+features <- str_split_fixed(features, ",", 561)
+library("stringr", lib.loc="~/R/win-library/3.2")
+install.packages("stringr")
+install.packages("stringr")
+features <- str_split_fixed(features, ",", 561)
+glimpse (features)
+rm(features)
+features <- read.table('features.txt',sep = "\t", header=FALSE)
+colnames (features) <- c ("features")
+features <- colsplit(features,split=",",features)
+?colsplit
+features <- colsplit(features,",",features)
+glimpse (features)
+rm(features)
+features <- read.table('features.txt',sep = "\t", header=FALSE)
+glimpse (features)
+features <- cbind(features)
+glimpse (features)
+features <- cbind(features)
+glimpse (features)
+rm(features)
+features <- read.table('features.txt',sep = "\t", header=FALSE)
+colnames (features) <- c ("feature_list")
+features <- cbind(features)
+glimpse (features)
+?separate
+rm(test_dc)
+rm(temp)
+rm(test_d)
+rm(testd)
+View(subject_test)
+View(subject_test)
+rm(subject_train)
+rm(test_dc)
+rm(train_dc)
+rm(subject_test)
+rm(ds)
+rm(features)
+rm(traind)
+rm(X_test)
+rm(X_train)
+rm(y_test)
+rm(y_train)
+rm(jdl)
+rm(jd1)
+rm(ln)
+features <- read.table('features.txt',sep = "\t", header=FALSE)
+colnames (features) <- c ("feature_val")
+subject_test <- read.table('test/subject_test.txt',sep = "\t", header=FALSE)
+colnames (subject_test) <- c ("subject_test_val")
+X_test <- read.table('test/X_test.txt',sep = "\t", header=FALSE)
+colnames (X_test) <- c ("X_test_val")
+y_test <- read.table('test/y_test.txt',sep = "\t", header=FALSE)
+colnames (y_test) <- c ("y_test_val")
+subject_train <- read.table('train/subject_train.txt',sep = "\t", header=FALSE)
+colnames (subject_train) <- c ("y_subject_val")
+X_train <- read.table('train/X_train.txt',sep = "\t", header=FALSE)
+colnames (subject_train) <- c ("X_train_val")
+y_train <- read.table('train/y_train.txt',sep = "\t", header=FALSE)
+colnames (subject_train) <- c ("y_train_val")
+test_dc <- cbind (subject_test, y_test, X_test)
+glimpse (test_dc)
+View(test_dc)
+View(test_dc)
+View(features)
+glimpse(activity_labels)
+combined_dc <- bind_rows(test_dc,train_dc)
+train_dc <- cbind (subject_train, y_train, X_train)
+combined_dc <- bind_rows(test_dc,train_dc)
+rm(train_dc)
+rm(train_dc)
+rm(test_dc )
+rm(y_train)
+rm(X_train)
+rm(X_test)
+rm(X_test,y_test)
+rm(subject_test,subject_train,X_test,y_test)
+subject_test <- read.table('test/subject_test.txt',sep = "\t", header=FALSE)
+colnames (subject_test) <- c ("subject_val")
+X_test <- read.table('test/X_test.txt',sep = "\t", header=FALSE)
+colnames (X_test) <- c ("X_val")
+y_test <- read.table('test/y_test.txt',sep = "\t", header=FALSE)
+colnames (y_test) <- c ("y_val")
+subject_train <- read.table('train/subject_train.txt',sep = "\t", header=FALSE)
+colnames (subject_train) <- c ("subject_val")
+X_train <- read.table('train/X_train.txt',sep = "\t", header=FALSE)
+colnames (subject_train) <- c ("X_val")
+y_train <- read.table('train/y_train.txt',sep = "\t", header=FALSE)
+colnames (subject_train) <- c ("y_val")
+test_dc <- cbind (subject_test, y_test, X_test)
+train_dc <- cbind (subject_train, y_train, X_train)
+combined_dc <- bind_rows(test_dc,train_dc)
+View(test_dc)
+View(train_dc)
+rm(subject_test,subject_train,X_test,y_test, X_train,y_train)
+rm(subject_test,subject_train,X_test,y_test, X_train,y_train,test_dc,train_dc)
+rm(features, subject_test,subject_train,X_test,y_test, X_train,y_train,test_dc,train_dc)
+features <- read.table('features.txt',sep = "\t", header=FALSE)
+colnames (features) <- c ("feature_val")
+subject_test <- read.table('test/subject_test.txt',sep = "\t", header=FALSE)
+colnames (subject_test) <- c ("subject_val")
+X_test <- read.table('test/X_test.txt',sep = "\t", header=FALSE)
+colnames (X_test) <- c ("X_val")
+y_test <- read.table('test/y_test.txt',sep = "\t", header=FALSE)
+colnames (y_test) <- c ("y_val")
+subject_train <- read.table('train/subject_train.txt',sep = "\t", header=FALSE)
+colnames (subject_train) <- c ("subject_val")
+X_train <- read.table('train/X_train.txt',sep = "\t", header=FALSE)
+colnames (X_train) <- c ("X_val")
+y_train <- read.table('train/y_train.txt',sep = "\t", header=FALSE)
+colnames (y_train) <- c ("y_val")
+test_dc <- cbind (subject_test, y_test, X_test)
+train_dc <- cbind (subject_train, y_train, X_train)
+combined_dc <- bind_rows(test_dc,train_dc)
+View(test_dc)
+View(train_dc)
+View(combined_dc)
