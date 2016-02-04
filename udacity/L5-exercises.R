@@ -1,3 +1,14 @@
+############################################################
+# load pseuo_facebook data
+############################################################
+getwd()
+
+setwd ('C:/Users/crcalder/Google Drive/eBay/Data-Science/datascience/udacity')
+
+pf <- read.csv('pseudo_facebook.tsv',sep = '\t')
+
+
+
 # Write code to create a new data frame called 'pf.fc_by_age_gender', that contains
 # information on each age AND gender group.
 # The data frame should contain the following variables:
@@ -80,8 +91,7 @@ View(pf.fc_by_age_gender.wide)
   # note 2: use floor command to round down to nearest year. Ceiling is to round up
  
   pf$year_joined <- floor(2014 - (pf$tenure / 365))
-
- head(pf)
+   head(pf)
  
  # L5, p10: Cut a Variable
  
@@ -92,8 +102,7 @@ View(pf.fc_by_age_gender.wide)
  #        (2009, 2011]
  #        (2011, 2012]
  #        (2012, 2014]
- # Note that a parenthesis means exclude the year and a
- # bracket means include the year.
+ # Note that a parenthesis means exclude the year and a bracket means include the year.
  
 # Note: What situation is cut useful in?
 # In many data analysis settings, it might be useful to break up a 
@@ -121,10 +130,14 @@ View(pf.fc_by_age_gender.wide)
      #        (2011, 2012]
      #        (2012, 2014]
  
- pf.year_joined.bucket <- cut (as.numeric(pf$year_joined), 
+ pf$year_joined.bucket <- cut (as.numeric(pf$year_joined), 
             breaks = c(2004,2009,2011,2012,2014))
  
-table (pf.year_joined.bucket)
+
+table (pf$year_joined.bucket)
+summary (pf$year_joined.bucket)
+
+rm (pf.year_joined.bucket)
 
 
 # L5, p11:  Plotting It All Together
@@ -135,7 +148,7 @@ table (pf.year_joined.bucket)
 # lines on your plot.
 
 ggplot(aes(x = age, y = friend_count), data = pf) + 
-  geom_line(aes(color = pf.year_joined.bucket), 
+  geom_line(aes(color = pf$year_joined.bucket), 
             stat = 'summary', fun.y = median)
 
 
@@ -146,7 +159,7 @@ ggplot(aes(x = age, y = friend_count), data = pf) +
 # (2) Use a different line type for the grand mean.
 
 ggplot(aes(x = age, y = friend_count), data = pf) + 
-  geom_line(aes(color = pf.year_joined.bucket), 
+  geom_line(aes(color = pf$year_joined.bucket), 
             stat = 'summary', fun.y = mean) +
   geom_line(linetype = 2, stat = 'summary', fun.y = mean)
 
@@ -156,4 +169,25 @@ ggplot(aes(x = age, y = friend_count), data = pf) +
 with (subset(pf, pf$tenure > 0), summary(friend_count/tenure))
 
 # L5, p14: Friendships Initiated
+# Create a line graph of mean of friendships_initiated per day (of tenure)
+# vs. tenure colored by year_joined.bucket.
+# You need to make use of the variables tenure,friendships_initiated, and year_joined.bucket.
+# You also need to subset the data to only consider user with at least
+# one day of tenure.
 
+
+ggplot(aes(x = tenure, y = (friendships_initiated / tenure)), 
+       data = pf) + 
+  geom_line(aes(color = pf$year_joined.bucket), 
+            stat = 'summary', fun.y = mean) 
+
+
+
+
+# L5, p14: Bias Variance Trade off Revisited
+ggplot(aes(x = 7 * round(tenure / 7), y = friendships_initiated / tenure),
+       data = subset(pf, tenure > 0)) +
+  geom_line(aes(color = pf.year_joined.bucket),
+            stat = "summary",
+            fun.y = mean)
+  
