@@ -122,7 +122,7 @@ diamonds.volume <- diamonds$x*diamonds$y*diamonds$z
   ggplot(data = diamonds_noout, aes(x = volume, y = price)) + 
     geom_point(alpha= 0.1) 
 
-  # 2. Adjust transparency and add linear model to plot
+  # 3. Adjust transparency and add linear model to plot
   
   ggplot(data = diamonds_noout, aes(x = volume, y = price)) + 
     geom_point(alpha= 0.1) +
@@ -170,6 +170,5 @@ diamonds.volume <- diamonds$x*diamonds$y*diamonds$z
   p1 <- ggplot(data = diamonds_mp_by_clarity, aes(x=clarity, y= mean_price)) + geom_boxplot()
     
   p2 <- ggplot(data = diamonds_mp_by_color, aes(x=color, y= mean_price)) + geom_boxplot()
-  
     
   grid.arrange(p1,p2,ncol = 1)
