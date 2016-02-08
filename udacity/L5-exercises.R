@@ -8,7 +8,6 @@ setwd ('C:/Users/crcalder/Google Drive/eBay/Data-Science/datascience/udacity')
 pf <- read.csv('pseudo_facebook.tsv',sep = '\t')
 
 
-
 # Write code to create a new data frame called 'pf.fc_by_age_gender', that contains
 # information on each age AND gender group.
 # The data frame should contain the following variables:
@@ -91,7 +90,9 @@ View(pf.fc_by_age_gender.wide)
   # note 2: use floor command to round down to nearest year. Ceiling is to round up
  
   pf$year_joined <- floor(2014 - (pf$tenure / 365))
-   head(pf)
+  
+  head(pf)
+
  
  # L5, p10: Cut a Variable
  
@@ -103,6 +104,7 @@ View(pf.fc_by_age_gender.wide)
  #        (2011, 2012]
  #        (2012, 2014]
  # Note that a parenthesis means exclude the year and a bracket means include the year.
+
  
 # Note: What situation is cut useful in?
 # In many data analysis settings, it might be useful to break up a 
@@ -130,14 +132,12 @@ View(pf.fc_by_age_gender.wide)
      #        (2011, 2012]
      #        (2012, 2014]
  
- pf$year_joined.bucket <- cut (as.numeric(pf$year_joined), 
+
+ pf.year_joined.bucket <- cut (as.numeric(pf$year_joined), 
             breaks = c(2004,2009,2011,2012,2014))
  
+table (pf.year_joined.bucket)
 
-table (pf$year_joined.bucket)
-summary (pf$year_joined.bucket)
-
-rm (pf.year_joined.bucket)
 
 
 # L5, p11:  Plotting It All Together
@@ -183,11 +183,71 @@ ggplot(aes(x = tenure, y = (friendships_initiated / tenure)),
 
 
 
-
 # L5, p14: Bias Variance Trade off Revisited
+
 ggplot(aes(x = 7 * round(tenure / 7), y = friendships_initiated / tenure),
-       data = subset(pf, tenure > 0)) +
-  geom_line(aes(color = pf.year_joined.bucket),
-            stat = "summary",
-            fun.y = mean)
-  
+       data = pf) +
+  geom_smooth(aes(color = pf$year_joined.bucket))
+
+
+
+# L5, p18:  Histograms Revisited
+## load yogurt data set
+## https://s3.amazonaws.com/udacity-hosted-downloads/ud651/yogurt.csv
+
+yo <- read.csv('yogurt.csv',sep = ',', header=TRUE)
+str(yo)
+
+# change the id from an INT to a FACTOR
+yo$id <- factor(yo$id)
+str(yo)
+
+qplot (yo$price, geom="histogram")
+
+# L5, p19: Number of purchase
+# Create a new variable called all.purchases,
+# which gives the total counts of yogurt for
+# each observation or household.
+# dataFrame <- transform(dataFrame, newColumnName = some equation)
+# So, to get the sum of two columns and store that into a new column with transform(), you would use code such as:
+# dataFrame <- transform(dataFrame, newColumn = oldColumn1 + oldColumn2)
+
+yo <- transform (yo ,all.purchases = (yo$strawberry + yo$blueberry + 
+                                      yo$pina.colada + yo$plain + yo$mixed.berry))
+
+qplot (x=all.purchases, data = yo, binwidth = 1)
+
+# L5, p20: Prices over time
+# Create a scatterplot of price vs time.
+
+ggplot (aes(x=time, y = price), data = yo) +
+  geom_jitter(alpha = 1/20, shape =  21, fill = I('#F79420'))
+
+# L5, p22: Looking at Samples of Households
+
+# set the seed so as to ensure reproducable results
+set.seed (4230)
+sample.ids <- sample (levels(yo$id),16)
+
+ggplot (aes (x = time, y = price), 
+        data = subset (yo, id %in% sample.ids)) +
+        facet_wrap(~id) +
+        geom_line() +
+        geom_point(aes(size=all.purchases),pch = 1)
+
+
+# L5, 23: Scatterplot matrix
+
+
+#install.packages(GGally)
+library (GGally)
+theme_set(theme_minimal(20))
+
+# set the see for reproducable results.
+set.seed (1836)
+pf_subset <-pf[,c(2:15)] #notice limiting the variables 2 through 15, removing 1 and 16
+names(pf_subset)
+ggpairs(pf_subset[sample.int(nrow(pf_subset),1000),])
+
+
+         

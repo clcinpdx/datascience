@@ -24,12 +24,12 @@ getwd()
 
 setwd ('C:/Users/crcalder/Google Drive/eBay/Data-Science/datascience/UCI HAR Dataset')
 
-############################################################
+#############################################################################################
 # 1. Merge the training and the test sets to create one data set.
-############################################################
+#############################################################################################
 
 # handy dataframe cleanup functions
-rm(features, subject_test,subject_train,X_test,y_test, X_train,y_train,test_dc,train_dc)
+rm(features, subject_test,subject_train,X_test,y_test, X_train,y_train,test_dc,train_dc,combined_dc)
 
 
 # create data sets from .txt files and name the variable 
@@ -50,38 +50,66 @@ rm(features, subject_test,subject_train,X_test,y_test, X_train,y_train,test_dc,t
       colnames (y_test) <- c ("y_val")
     
     X_train <- read.csv ('train/X_train.txt', sep = '', header=FALSE)
-      colnames (X_train) -> features$feature_txt
+      colnames (X_train) <- features$feature_txt
     
     y_train <- read.csv ('train/y_train.txt', sep = '', header=FALSE)
       colnames (y_train) <- c ("y_val")
     
-    
-# gather test and training variables
+# gather variables and convert rows into columns   
+
     test_dc <- cbind (subject_test, y_test, X_test)
-    
     train_dc <- cbind (subject_train, y_train, X_train)
     
+    View (test_dc)
+    View (train_dc)
+    
+    
 # combine test and training data into single frame
-    combined_dc <- bind_rows(test_dc,train_dc)
+    
+    
+    combined_dc <- rbind(test_dc,train_dc)
+    
+    View (combined_dc)
 
+    # clean up unneeded variables and data frames
+    rm(features, subject_test,subject_train,X_test,y_test, X_train,y_train,test_dc,train_dc)
+    
 
-
-
+#############################################################################################
 # 2. Extracts columns containing mean and standard deviation for each measurement 
+#############################################################################################
+    
+    summarise(combined_dc)
 
-
-
-
+#############################################################################################
 # 3. Creates variables called ActivityLabel and ActivityName that label all 
 #    observations with the corresponding activity labels and names respectively
+#############################################################################################
+    
+    ActivityLabels <- read.csv ('activity_labels.txt', sep = '', header=FALSE) 
+    colnames (ActivityLabels) <- c ("ActivityLabel","ActivityName")
+    
+    View(ActivityLabels)
 
-    separate (activity_labels,c("ActivityLabel","ActivityName"), sep = ",")
-      
-      glimpse(activity_labels)
-
-
+    #note: This technique changes the y_val to be a label
+    combined_dc$y_val <- factor (combined_dc$y_val,
+                                 levels = ActivityLabels$ActivityLabel, 
+                                 labels = ActivityLabels$ActivityName)
+    
+    # note: This techinque creates a new colum
+    # dataFrame <- transform(dataFrame, newColumn = oldColumn1 + oldColumn2)
+    combined_dc <- transform (combined_dc, y_val_full = 
+                                factor (combined_dc$y_val,
+                                        levels = ActivityLabels$ActivityLabel, 
+                                        labels = ActivityLabels$ActivityName))
+    
+    summarise(combined_dc)
+    
+    
+#############################################################################################
 # 4. From the data set in step 4, creates a second, independent tidy data 
 #    set with the average of each variable for each activity and each subject.
+#############################################################################################
     
     
     
