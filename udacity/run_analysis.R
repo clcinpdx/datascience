@@ -31,49 +31,50 @@ setwd ('C:/Users/crcalder/Google Drive/eBay/Data-Science/datascience/UCI HAR Dat
 # handy dataframe cleanup functions
 rm(features, subject_test,subject_train,X_test,y_test, X_train,y_train,test_dc,train_dc,combined_dc)
 
-
 # create data sets from .txt files and name the variable 
 
-    features <- read.csv ('features.txt', sep = '', header=FALSE) 
+    features <- read.csv ('features.txt', sep = ' ', header=FALSE) 
       colnames (features) <- c ("feature_val","feature_txt")
-
-    subject_test <- read.csv ('test/subject_test.txt', sep = '', header=FALSE)
-      colnames (subject_test) <- c ("subject_val")
-
-    subject_train <- read.csv ('train/subject_train.txt', sep = '', header=FALSE)  
-      colnames (subject_train) <- c ("subject_val")
+      features$unique_features <- with(features, interaction(features$feature_val,
+                                       features$feature_txt))
       
-    X_test <- read.csv ('test/X_test.txt', sep = '', header=FALSE)
-      colnames (X_test) <- features$feature_txt
-    
-    y_test <- read.csv ('test/y_test.txt', sep = '', header=FALSE)
+      
+    y_test  <- read.csv ("test/y_test.txt", sep = ' ', header = FALSE)
       colnames (y_test) <- c ("y_val")
-    
+      dim(y_test)
+      
+    subject_test <- read.csv ('test/subject_test.txt', sep = ' ', header=FALSE)
+      colnames (subject_test) <- c ("subject_val")
+      dim (subject_test)
+
+    subject_train <- read.csv ('train/subject_train.txt', sep = ' ', header=FALSE)  
+      colnames (subject_train) <- c ("subject_val")
+      dim(subject_train)
+            
+    X_test <- read.csv ('test/X_test.txt', sep = '', header=FALSE)
+      colnames (X_test) = features$unique_features
+      dim(X_test)
+      
     X_train <- read.csv ('train/X_train.txt', sep = '', header=FALSE)
-      colnames (X_train) <- features$feature_txt
-    
-    y_train <- read.csv ('train/y_train.txt', sep = '', header=FALSE)
+      colnames (X_train) = features$unique_features
+      dim(X_train)
+
+    y_train <- read.csv ('train/y_train.txt', sep = ' ', header=FALSE)
       colnames (y_train) <- c ("y_val")
-    
+      dim(y_train)
+      
+      
 # gather variables and convert rows into columns   
 
     test_dc <- cbind (subject_test, y_test, X_test)
     train_dc <- cbind (subject_train, y_train, X_train)
-    
-    View (test_dc)
-    View (train_dc)
-    
+
     
 # combine test and training data into single frame
     
-    
     combined_dc <- rbind(test_dc,train_dc)
-    
-    View (combined_dc)
 
-    # clean up unneeded variables and data frames
-    rm(features, subject_test,subject_train,X_test,y_test, X_train,y_train,test_dc,train_dc)
-    
+
 
 #############################################################################################
 # 2. Extracts columns containing mean and standard deviation for each measurement 
@@ -89,27 +90,29 @@ rm(features, subject_test,subject_train,X_test,y_test, X_train,y_train,test_dc,t
     ActivityLabels <- read.csv ('activity_labels.txt', sep = '', header=FALSE) 
     colnames (ActivityLabels) <- c ("ActivityLabel","ActivityName")
     
-    View(ActivityLabels)
-
     #note: This technique changes the y_val to be a label
     combined_dc$y_val <- factor (combined_dc$y_val,
                                  levels = ActivityLabels$ActivityLabel, 
                                  labels = ActivityLabels$ActivityName)
-    
-    # note: This techinque creates a new colum
-    # dataFrame <- transform(dataFrame, newColumn = oldColumn1 + oldColumn2)
-    combined_dc <- transform (combined_dc, y_val_full = 
-                                factor (combined_dc$y_val,
-                                        levels = ActivityLabels$ActivityLabel, 
-                                        labels = ActivityLabels$ActivityName))
-    
-    summarise(combined_dc)
-    
-    
+
+  
+
 #############################################################################################
 # 4. From the data set in step 4, creates a second, independent tidy data 
 #    set with the average of each variable for each activity and each subject.
 #############################################################################################
+ 
+# Using dplyr to group and summarize each variable to its average
+    
+    tidy_dc <- combined_dc %>%
+      group_by(subject_val,y_val) %>%
+      summarise_each(funs(mean)) %>%
+      ungroup() %>% 
+      arrange()
+
+    head(tidy_dc, 6*3)
     
     
-    
+    # clean up unneeded variables and data frames
+    rm(features, subject_test,subject_train,X_test,y_test, X_train,y_train,test_dc,train_dc)
+    rm(combined_dc, tidy_dc)
