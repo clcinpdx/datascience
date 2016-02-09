@@ -1,0 +1,81 @@
+1. What is the problem you want to solve?
+
+To predict whether a person is a good or bad candidate for a medium term (36 or 60 month) loan based on available attributes. 
+
+Secondarily to estimate an appropriate interest rate for the person given their likelihood of default based on historical data (note: this calculation would be much better if the data included dates which then could be used to include prevailing national interest rates).
+
+
+2. Who is your client and why do they care about this problem? In other words, what will your client DO or DECIDE based on your analysis that they wouldn't have otherwise?
+
+The client is a bank who requires a model that will want to as-close-to-real-time as possible want to evaluate a potential customer's likelihood of being a good candidate for a loan. It would be highly preferable to produce two models, one that may be an initial solution based on just a few key predictive variables, and a second which includes more data to get to a higher confidence level.
+
+
+a) Identify which variables can be used to predict whether a potential customer is a good or bad loan candidate.  Available attributes such as employment length, whether they own a home, what their annual income is, what purpose is the loan, what state they live in, etc. 
+
+This will require the calculation of a threshold beyond which the customer transitions to a bad loan candidate.
+
+
+b) determine the appropriate interest rate that should be offered to the client based on their likelihood to repay the loan (or not, 
+as the case may be). This will be determined by using historical data.
+
+
+3. What data are you going to use for this? How will you acquire this data?
+
+https://github.com/h2oai/app-consumer-loan/tree/master/data/loan.csv
+https://www.lendingclub.com/info/download-data.action
+
+loan.csv contains 163,987 rows which will be split 70% in the training data set and 30% in the test data set. 
+
+The following attributes exist for each completed loan observation: 
+
+.	loan_amnt: Loan amount ranges from 500 to 35,000
+.	term: Term in months: either 36 or 60 months
+.	int_rateL Interest rate, ranging from 5.42 the best candidate (e.g. lowest risk) to 26.06 for high risk customers.
+.	emp_length: Employment length, ranging from 0 (no job) to 10 years
+.	home_ownership: Home Ownership, including current mortgage amount, and split between owners and renters.
+.	annual_inc: Annual income, ranging from a paltry $1,896 to $7,141,778
+.	purpose: Purpose of the loan categorized into categories.
+.	addr_state: The state of the USA that the loan receiptient lives
+.	dti: ?
+.	delinq_2yrs: Delinquency
+.	revol_util: Revolving Util?
+.	total_acc: Total 
+.	bad_loan: "Bad Loan" status = 1/0
+.	longest_credit_length: Longest Credit Lenth: 
+.	verification_status: Verification Status: 
+
+In summary, each row captures information about a consumer and the column "bad_loan" captures if the consumer
+was either a good or bad loan. This data is unevenly split between good and bad loans:
+.	Good Loans (0): 133,971 observations
+.	Bad Loans (1): 30,016 observations
+
+The original data can be downloaded at <https://www.lendingclub.com/info/download-data.action> and it is 
+all the data from 2007 to September 30, 2015. The Lending Club site also publishes a second data set that contains the 
+declined loan data set (which does not have the same feature set) but may be needed for this analysis.  
+
+
+4. In brief, outline your approach to solving this problem (knowing that this might change later).
+
+1. The first step will be to randomly split the data set into a test and training set 25/75.
+
+  ## 75% of the sample size
+  smp_size <- floor(0.75 * nrow(loan))
+  
+  ## set the seed to make partition reproductible
+  set.seed(123)
+  train_ind <- sample(seq_len(nrow(loan)), size = smp_size)
+
+  ltrain <- loan [train_ind, ]
+  ltest <- loan [-train_ind, ]
+
+
+2. Identify the most predicative variables
+
+3. Fit and predict using different classes of models to determine whether a customer should be approved or denied a loan (e.g. Yes/No or 1/0) 
+based on the historical data provided in the loan.csv data set. 
+
+  Models shall be developed and tested that that provide the best fit and minimize Type 1 and Type 2 error. 
+  The cut off (AKA transition from good to bad) shall be adjusted so as to minimize the type 1 and 2 errors.
+
+
+5. What are your deliverables? Typically, this would include code, along with a paper and/or a slide deck.
