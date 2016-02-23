@@ -14,8 +14,6 @@ a) Identify which variables can be used to predict whether a potential customer 
 
 This will require the calculation of a threshold beyond which the customer transitions to a bad loan candidate.
 
-b) determine the appropriate interest rate that should be offered to the client based on their likelihood to repay the loan (or not, 
-as the case may be). This will be determined by using historical data.
 
 
 3. What data are you going to use for this? How will you acquire this data?

@@ -86,13 +86,10 @@ ggplot (aes(x=loan_amnt),data=loan) +
 #################################################################
 
 # Bivariate Model
-# When we're not sure which of our variables are useful in predicting a 
-# particular outcome, it's often helpful to build bivariate models, which 
-# are models that predict the outcome using a single independent variable. 
-# We'll define an independent variable as significant if there is at 
-# least one star at the end of the coefficients row for that variable 
-# (this is equivalent to the probability column having a value smaller 
-# than 0.05)
+# Build Bivariate models to identify which of our variables are useful in predicting a 
+# particular outcome (e.g. models that predict the outcome using a single independent variable.) 
+# An independent variable shall be considered significant if there is at least one star at 
+# the end of the coefficients row for that variable (e.g. the probability column having a value smaller than 0.05)
 
 LoanModBi = glm (bad_loan ~ loan_amnt + term + int_rate + emp_length + home_ownership + annual_inc +
                    purpose + addr_state + dti + delinq_2yrs + revol_util + total_acc + longest_credit_length+
@@ -145,16 +142,14 @@ LoanModBi15 = glm (bad_loan ~ verification_status, data=loan_train, family="bino
 summary(LoanModBi15)
 
 
-
-# from these summaries we can see that the following variables appear significant:
-#
-#   signifcant: loan_amnt, term60 months, int_rate, annual_inc, "some of" purpose, "some of" state, 
+# from these summaries we can see that the following variables appear significant to predicting 
+# a bad_loan: loan_amnt, term60 months, int_rate, annual_inc, "some of" purpose, "some of" state, 
 #   dti, delinq_2yrs, revol_util, longest_credit_length, verification_status, total_acc
 # 
 #   not significant: emp_length, home_ownership
 
 
-# New model with only potentially signficant variables
+# New model with only signficant variables
 
 LoanModBi00 = glm (bad_loan ~ loan_amnt + term + int_rate + annual_inc +
                    purpose + addr_state + dti + delinq_2yrs + revol_util 
@@ -165,6 +160,7 @@ summary(LoanModBi00)
 
 
 # Multivariate Models for bad loans
+
 # Often, variables that were significant in bivariate models are no longer significant in 
 # multivariate analysis due to correlation between the variables.
 
@@ -177,11 +173,85 @@ cor(loan_train[c("loan_amnt", "term", "int_rate", "annual_inc", "purpose", "addr
            "dti", "delinq_2yrs", "revol_util", "total_acc", "longest_credit_length",
            "verification_status")])
 
+cor(loan_train$loan_amnt,loan_train$term)
+cor(loan_train$loan_amnt,loan_train$int_rate)
+cor(loan_train$loan_amnt,loan_train$annual_inc)
+cor(loan_train$loan_amnt,loan_train$purpose)
+cor(loan_train$loan_amnt,loan_train$addr_state)
+cor(loan_train$loan_amnt,loan_train$dti)
+cor(loan_train$loan_amnt,loan_train$delinq_2yrs)
+cor(loan_train$loan_amnt,loan_train$revol_util)
+cor(loan_train$loan_amnt,loan_train$total_acc)
+cor(loan_train$loan_amnt,loan_train$longest_credit_length)
+cor(loan_train$loan_amnt,loan_train$verification_status)
+cor(loan_train$term,loan_train$int_rate)
+cor(loan_train$term,loan_train$annual_inc)
+cor(loan_train$term,loan_train$purpose)
+cor(loan_train$term,loan_train$addr_state)
+cor(loan_train$term,loan_train$dti)
+cor(loan_train$term,loan_train$delinq_2yrs)
+cor(loan_train$term,loan_train$revol_util)
+cor(loan_train$term,loan_train$total_acc)
+cor(loan_train$term,loan_train$longest_credit_length)
+cor(loan_train$term,loan_train$verification_status)
+cor(loan_train$int_rate,loan_train$annual_inc)
+cor(loan_train$int_rate,loan_train$purpose)
+cor(loan_train$int_rate,loan_train$addr_state)
+cor(loan_train$int_rate,loan_train$dti)
+cor(loan_train$int_rate,loan_train$delinq_2yrs)
+cor(loan_train$int_rate,loan_train$revol_util)
+cor(loan_train$int_rate,loan_train$total_acc)
+cor(loan_train$int_rate,loan_train$longest_credit_length)
+cor(loan_train$int_rate,loan_train$verification_status)
+cor(loan_train$annual_inc,loan_train$purpose)
+cor(loan_train$annual_inc,loan_train$addr_state)
+cor(loan_train$annual_inc,loan_train$dti)
+cor(loan_train$annual_inc,loan_train$delinq_2yrs)
+cor(loan_train$annual_inc,loan_train$revol_util)
+cor(loan_train$annual_inc,loan_train$total_acc)
+cor(loan_train$annual_inc,loan_train$longest_credit_length)
+cor(loan_train$annual_inc,loan_train$verification_status)
+cor(loan_train$purpose,loan_train$addr_state)
+cor(loan_train$purpose,loan_train$dti)
+cor(loan_train$purpose,loan_train$delinq_2yrs)
+cor(loan_train$purpose,loan_train$revol_util)
+cor(loan_train$purpose,loan_train$total_acc)
+cor(loan_train$purpose,loan_train$longest_credit_length)
+cor(loan_train$purpose,loan_train$verification_status)
+cor(loan_train$addr_state,loan_train$dti)
+cor(loan_train$addr_state,loan_train$delinq_2yrs)
+cor(loan_train$addr_state,loan_train$revol_util)
+cor(loan_train$addr_state,loan_train$total_acc)
+cor(loan_train$addr_state,loan_train$longest_credit_length)
+cor(loan_train$addr_state,loan_train$verification_status)
+cor(loan_train$dti,loan_train$delinq_2yrs)
+cor(loan_train$dti,loan_train$revol_util)
+cor(loan_train$dti,loan_train$total_acc)
+cor(loan_train$dti,loan_train$longest_credit_length)
+cor(loan_train$dti,loan_train$verification_status)
+cor(loan_train$delinq_2yrs,loan_train$revol_util)
+cor(loan_train$delinq_2yrs,loan_train$total_acc)
+cor(loan_train$delinq_2yrs,loan_train$longest_credit_length)
+cor(loan_train$delinq_2yrs,loan_train$verification_status)
+cor(loan_train$revol_util,loan_train$total_acc)
+cor(loan_train$revol_util,loan_train$longest_credit_length)
+cor(loan_train$revol_util,loan_train$verification_status)
+cor(loan_train$total_acc,loan_train$longest_credit_length)
+cor(loan_train$total_acc,loan_train$verification_status)
+cor(loan_train$longest_credit_length,loan_train$verification_status)
+
 
 # Question for Anirban: How do you deal with non-numeric values like term, purpose, addr_state, verification_status?
+# Error in cor(loan_train[c("loan_amnt", "term", "int_rate", "annual_inc",  : 
+# 'x' must be numeric
 
 cor(loan_train[c("loan_amnt", "int_rate", "annual_inc", 
                  "dti", "delinq_2yrs", "revol_util", "total_acc", "longest_credit_length")])
+
+
+
+
+
 
 
 
@@ -193,25 +263,24 @@ cor(loan_train[c("loan_amnt", "int_rate", "annual_inc",
 ### AKA Type 1 and 2 errors
 ######################################################################
 
-# Next we shall convert the probabilities to predictions using what's 
-# called a threshold value, t. If the probability of bad loan is greater than this threshold
-# value, t, we predict a bad loan.
+# Convert the probabilities to predictions using a threshold value, t. If the probability of bad 
+# loan is greater than this threshold value, t, we predict a bad loan.
 
 # But if the probability of a bad loan is less than the threshold value,t, 
 # then we predict that we have a good loan candidate.
 
-# But what value should we pick for the threshold, t? The threshold value, 
-# t, is often selected based on which errors are 
+# The threshold value, t, is often selected based on which errors are 
 # better. There are two types of errors that a model can make --
 # ones where you predict 1, or bad loan, but the actual outcome is 0, 
 # and ones where you predict 0, or a good loan, but the actual outcome is 1 (bad loan).
 
-# If we pick a large threshold value t, then we will predict bad loan case 
+# Since this customer is a bank, we'll assume the prefernce is to minimize the number of 
+# bad loans, so we pick a large threshold value t, which will predict bad loan case 
 # rarely, since the probability of bad loan has to be really large to be greater 
 # than the threshold.
 
 # This means that we will make more errors where we say good loan, but it's 
-# actually a bad loan.On the other hand, if the threshold value, t, is 
+# actually a bad loan. On the other hand, if the threshold value, t, is 
 # small, we predict bad loans frequently, and we predict good loans rarely.
 
 # This means that we will make more errors where we say bad loan, but 
