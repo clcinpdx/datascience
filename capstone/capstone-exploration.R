@@ -4,31 +4,178 @@
 # install packages
 ############################################################
 library("ggplot2", lib.loc="~/R/win-library/3.2")
-install.packages("ggplot2")
-
 library("gridExtra", lib.loc="~/R/win-library/3.2")
-install.packages("gridExtra")
-
 library("dplyr", lib.loc="~/R/win-library/3.2")
-install.packages("dplyr")
-
 library("tidyr", lib.loc="~/R/win-library/3.2")
-install.packages("tidyr")
-
 library("stringr", lib.loc="~/R/win-library/3.2")
+
+install.packages("ggplot2")
+install.packages("gridExtra")
+install.packages("dplyr")
+install.packages("tidyr")
 install.packages("stringr")
 
 ############################################################
-# set working directory and load data
+# 1. set working directory and load data
 ############################################################
 getwd()
 
 setwd ('C:/Users/crcalder/Google Drive/eBay/Data-Science/datascience/capstone')
 
-loan  <- read.csv ("loan.csv", sep = ',', header = TRUE)
+# create the loan dataframe from the loan.csv data file
+loan  <- read.csv ("loan.csv", sep = ',', header = TRUE, stringsAsFactors = FALSE)
+
+str (loan)
+
+# Description of Variables:
+# Source: https://www.lendingclub.com/info/download-data.action
+###########################################################################################################
+#
+### Target Value (AKA Class) - Binary Classification 
+#
+# bad_loan    Numeric: 1 = Bad Loan, 0 = Good loan. Captures if the consumer was either a good or bad loan. 
+#             This data is unevenly split between good and bad loans: Good Loans (0): 133,971 observations
+#             Bad Loans (1): 30,016 observations
+#
+### Features (AKA predictors or attributes or features )
+#
+# loan_amnt	  The listed amount of the loan applied for by the borrower. If at some point in time, the credit department reduces the loan amount, then it will be reflected in this value.
+#             Loan amount ranges from 500 to 35,000.
+#
+# term	      (chr) The number of payments on the loan. Values are in months and can be either 36 or 60.
+#
+# int_rate    Ranging from 5.42 the best candidate (e.g. lowest risk) to 26.06 for high risk customers.
+#
+# emp_length	Employment length in years. Possible values are between 0 and 10 where 0 means less than one year and 10 means ten or more years. 
+#
+# home_ownership	(chr) The home ownership status provided by the borrower during registration. Our values are: RENT, OWN, MORTGAGE, OTHER.
+#
+# annual_inc	The self-reported annual income provided by the borrower during registration.
+#
+# purpose	    (chr) A category provided by the borrower for the loan request. 
+#
+# addr_state	The state provided by the borrower in the loan application
+#
+# dti	        A ratio calculated using the borrower's total monthly debt payments on the total debt obligations, excluding mortgage and the requested LC loan, divided by the borrower's self-reported monthly income.
+#
+# delinq_2yrs	The number of 30+ days past-due incidences of delinquency in the borrower's credit file for the past 2 years
+#
+# revol_util	Revolving line utilization rate, or the amount of credit the borrower is using relative to all available revolving credit.
+#
+# longest_credit_length
+#
+# verification_status   (chr)
 
 #############################################################################################
-# 1. Split the dataset into training and the test sets.
+# 2. Wrangle: Convert data to numeric or factors where needed, inpute missing values
+#############################################################################################
+#
+# When to use numeric versus factor values? Factor values should be used for categorical data 
+# (e.g. discrete units that are not in any specific order), numeric should be used for continuous, 
+#  ratio, or (some) interval level data.
+
+
+# 2a) Convert bad_loan char (dependent variable) to factors 
+loan$bad_loan <- as.factor(loan$bad_loan)
+
+
+# 2b) variables need to be numeric (e.g. "36 months" to 36)
+loan$term <- as.vector(loan$term)
+loan$term <- regmatches(loan$term, regexpr("[[:digit:]]+", loan$term))
+loan$term <- as.factor(loan$term)
+
+# 2c) add_state needs to factored and grouped 
+# http://www.stat.berkeley.edu/~s133/factors.html
+# regions: https://en.wikipedia.org/wiki/List_of_regions_of_the_United_States#Interstate_regions
+loan$addr_state <- as.factor(loan$addr_state)
+levels(loan$addr_state) <- c(
+   #   AK      AL     AR     AZ     CA     CO       CT          DC         DE           FL   GA        HI  #
+     "West","South","West","West","West","West","Northeast","Northeast","Northeast","South","South", "West", 
+   #   IA        ID       IL        IN       KS        KY     LA        MA         MD       ME          MI        MN   #
+    "Midwest","West","Midwest","Midwest","Midwest","South","South","Northeast","South","Northeast","Midwest","Midwest",  
+   #   MO      MS     MT     NC      NE       NH          NJ        NM     NV        NY        OH      OK #
+     "West","South","West","South","West","Northeast","Northeast","West","West","Northeast","Midwest","South", 
+   #   OR        PA          RI        SC      SD        TN      TX     UT     VA       VT       WA      WI        WV     WY #
+     "West","Northeast","Northeast","South","Midwest","South","South","West","South","Midwest","West","Midwest","South","West")
+
+
+# 2d) factor and group purpoe 
+loan$purpose <- as.factor (loan$purpose)
+levels(loan$purpose) <- c (
+   #   car    credit_card debt_consolidation educational home_improvement house   major_purchase   medical #
+    "consumer","consumer",   "consumer",    "other" ,  "shelter",  "shelter", "consumer",   "other",
+    # moving   other renewable_energy small_business vacation   wedding
+    "shelter","other",  "shelter",     "other",  "consumer","consumer")
+
+
+# 2e) factor verification_status
+loan$verification_status <- as.factor(loan$verification_status)
+
+# 2f) factor home_ownership
+loan$home_ownership <- as.factor(loan$home_ownership)
+levels(loan$home_ownership) <- c ("other","mortgage","other","other","other","rent")
+str(loan$home_ownership)
+
+
+# 2g) Remove outliers from the dataset
+
+# note: with outliers, annual_inc results in a glm.fit warning for fitted probabilites numbericall 0 or 1 occured
+# http://stats.stackexchange.com/questions/11109/how-to-deal-with-perfect-separation-in-logistic-regression
+# http://www.ats.ucla.edu/stat/mult_pkg/faq/general/complete_separation_logit_models.htm
+
+
+#      i) look at summary, look for variables where the mean and median are significantly different
+          summary(loan)
+#     ii) specifically in the annual income data, with a Max value of $7,142,000  
+          summary (loan$annual_inc)
+          big_income <- subset(loan,loan$annual_inc >= 1000000)
+#     iii) 27 observatiosn have over $1,000,000 in income. Let's exclude them from this set since they would likely need to be 
+#          considered separately for a loan
+          loan <- subset(loan,loan$annual_inc < 1000000)
+
+
+
+#####################################################################
+## 3) Impute missing values to eliminate NA's later
+## http://www.r-bloggers.com/imputing-missing-data-with-r-mice-package/
+#####################################################################
+
+library(mice)
+
+# Determine which variables are missing data and what percent?
+pMiss <- function(x){sum(is.na(x))/length(x)*100}
+apply(loan,2,pMiss)
+
+# indicates the following variables are misssing values:
+# emp_length (580 or 3.5%), annual_inc (4 or 0.002%), and delinq_2yrs (29), 
+# total_acc (2), revol_util (193), longest_credit_length (29 or 0.017%)
+# A "safe" maximum threshold is 5% of the total for large datasets. 
+
+tempData <- mice(loan,m=1,maxit=20,meth='pmm',seed=500)
+summary(tempData)
+
+tempData$imp$annual_inc
+apply(completedData,2,pMiss)
+
+loan <- complete(tempData,1)
+apply(loan,2,pMiss)
+
+# examine the datasets 
+library(lattice)
+densityplot(tempData)
+
+# http://www.programiz.com/r-programming/strip-chart
+# http://www.inside-r.org/packages/cran/mice/docs/stripplot
+stripplot(tempData, pch = 20, cex = 1.2)
+
+
+# confirm new loan dataset has no N/A's
+pMiss <- function(x){sum(is.na(x))/length(x)*100}
+apply(loan,2,pMiss)
+
+
+#############################################################################################
+# 4. Split the dataset into training and the test sets.
 #############################################################################################
 
 ## 75% of the sample size
@@ -38,38 +185,499 @@ smp_size <- floor(0.75 * nrow(loan))
 set.seed(123)
 train_ind <- sample(seq_len(nrow(loan)), size = smp_size)
 
-ltrain <- loan [train_ind, ]
-ltest <- loan [-train_ind, ]
+loan_train <- loan [train_ind, ]
+loan_test <- loan [-train_ind, ]
+
+
+
+#################################################################################################
+# 5. Model 1 - Logistic Regression Model
+#################################################################################################
+
+
+################################################################# 
+## since we are trying to detemine either loan or no loan, which
+## we will use a logistic regression model
+#################################################################
+
+# 5a) Creatig the Bivariate Models
+
+# Build Bivariate models to identify which of our variables are useful in predicting a 
+# particular outcome (e.g. models that predict the outcome using a single independent variable.) 
+# An independent variable shall be considered significant if there is at least one star at 
+# the end of the coefficients row for that variable (e.g. the probability column having a value smaller than 0.05)
+
+# Create a matrix containing only the Variable, its P-Value, and the "significance"
+# for the numeric variables
+
+Binomial_Results_Summary <- matrix (nrow=14, ncol =3)
+colnames(Binomial_Results_Summary) <- c("Variable","P-Value", "significance")
+ranges <- c(0, 0.001, 0.01, 0.05, 0.1)
+codes <- c("***" , "**","*", ".", " ")
+
+LoanModBi01 = glm (bad_loan ~ loan_amnt, data=loan_train, family="binomial")
+Binomial_Results_Summary [1,] <- c("Loan_amount", coef(summary(LoanModBi01))[2,"Pr(>|z|)"],"")
+Binomial_Results_Summary [1,3] <- codes[findInterval(Binomial_Results_Summary[1,2], ranges)]
+
+LoanModBi02 = glm (bad_loan ~ int_rate, data=loan_train, family="binomial")
+Binomial_Results_Summary [2,] <- c("int_rate", coef(summary(LoanModBi02))[2,"Pr(>|z|)"], "")
+Binomial_Results_Summary [2,3] <- codes[findInterval(Binomial_Results_Summary[2,2], ranges)]
+
+LoanModBi03 = glm (bad_loan ~ emp_length, data=loan_train, family="binomial")
+Binomial_Results_Summary [3,] <- c("emp_length", coef(summary(LoanModBi03))[2,"Pr(>|z|)"], "")
+Binomial_Results_Summary [3,3] <- codes[findInterval(Binomial_Results_Summary[3,2], ranges)]
+
+LoanModBi04 = glm (bad_loan ~ annual_inc, data=loan_train, family="binomial")
+Binomial_Results_Summary [4,] <- c("annual_inc", coef(summary(LoanModBi04))[2,"Pr(>|z|)"],"")
+Binomial_Results_Summary [4,3] <- codes[findInterval(Binomial_Results_Summary[4,2], ranges)]
+
+LoanModBi05 = glm (bad_loan ~ dti, data=loan_train, family="binomial")
+Binomial_Results_Summary [5,] <- c("dti", coef(summary(LoanModBi05))[2,"Pr(>|z|)"], "")
+Binomial_Results_Summary [5,3] <- codes[findInterval(Binomial_Results_Summary[5,2], ranges)]
+
+LoanModBi06 = glm (bad_loan ~ delinq_2yrs, data=loan_train, family="binomial")
+Binomial_Results_Summary [6,] <- c("delinq_2yrs", coef(summary(LoanModBi06))[2,"Pr(>|z|)"], "")
+Binomial_Results_Summary [6,3] <- codes[findInterval(Binomial_Results_Summary[6,2], ranges)]
+
+LoanModBi07 = glm (bad_loan ~ revol_util, data=loan_train, family="binomial")
+Binomial_Results_Summary [7,] <- c("revol_util", coef(summary(LoanModBi07))[2,"Pr(>|z|)"], "")
+Binomial_Results_Summary [7,3] <- codes[findInterval(Binomial_Results_Summary[7,2], ranges)]
+
+LoanModBi08 = glm (bad_loan ~ total_acc, data=loan_train, family="binomial")
+Binomial_Results_Summary [8,] <- c("total_acc", coef(summary(LoanModBi08))[2,"Pr(>|z|)"], "")
+Binomial_Results_Summary [8,3] <- codes[findInterval(Binomial_Results_Summary[8,2], ranges)]
+
+LoanModBi09 = glm (bad_loan ~ longest_credit_length, data=loan_train, family="binomial")
+Binomial_Results_Summary [9,] <- c("longest_credit_length", coef(summary(LoanModBi09))[2,"Pr(>|z|)"], "")
+Binomial_Results_Summary [9,3] <- codes[findInterval(Binomial_Results_Summary[9,2], ranges)]
+
+
+##################################################################################
+# 5 c): chi-squared tests information for non-numeric variables:
+##################################################################################
+#
+# http://stackoverflow.com/questions/3571909/calculate-correlation-cor-for-only-a-subset-of-columns
+# http://www.r-tutor.com/elementary-statistics/goodness-fit/chi-squared-test-independence
+# http://stackoverflow.com/questions/26728197/error-creating-chisq-test-in-r-invalid-type-character-of-argument
+
+# chi squared tests for the remaining five factor variables
+
+Binomial_Results_Summary [10,] <- c("term",chisq.test(loan_train$bad_loan,loan_train$term)$p.value, "")
+Binomial_Results_Summary [10,3] <- codes[findInterval(Binomial_Results_Summary[10,2], ranges)]
+
+
+Binomial_Results_Summary [11,] <- c("addr_state",chisq.test(loan_train$bad_loan,loan_train$addr_state)$p.value, "")
+Binomial_Results_Summary [11,3] <- codes[findInterval(Binomial_Results_Summary[11,2], ranges)]
+
+Binomial_Results_Summary [12,] <- c("purpose",chisq.test(loan_train$bad_loan,loan_train$purpose)$p.value, "")
+Binomial_Results_Summary [12,3] <- codes[findInterval(Binomial_Results_Summary[12,2], ranges)]
+
+
+Binomial_Results_Summary [13,] <- c("home_ownership",chisq.test(loan_train$bad_loan,loan_train$home_ownership)$p.value, "")
+Binomial_Results_Summary [13,3] <- codes[findInterval(Binomial_Results_Summary[13,2], ranges)]
+
+
+Binomial_Results_Summary [14,] <- c("verification_status",chisq.test(loan_train$bad_loan,loan_train$verification_status)$p.value, "")
+Binomial_Results_Summary [14,3] <- codes[findInterval(Binomial_Results_Summary[14,2], ranges)]
+
+
+Binomial_Results_Summary [15,] <- c("term",chisq.test(loan_train$bad_loan,loan_train$term)$p.value, "")
+Binomial_Results_Summary [15,3] <- codes[findInterval(Binomial_Results_Summary[15,2], ranges)]
+
+# Display complete matrix including Significance labels
+Binomial_Results_Summary
+
+
+# Conclusion: from the above, the following variables are significant to predicting (P > +/- 0.8) a bad_loan:
+#             loan_amnt, term, int_rate, annual_inc, dti, 
+#             delinq_2yrs, revol_util, longest_credit_length, total_acc
+#
+# The following variables will not be used: annual_inc
+#
+
+
+
+
+###########################################################################################
+# 5 d) Multi-variate Models for bad loans
+
+# Often, variables that were significant in bivariate models are no longer significant in 
+# multivariate analysis due to correlation between the variables.
+
+# Evaluating the variable pairs to determine if any have a high degree of correlation 
+# (a correlation greater than 0.8 or less than -0.8):
+
+# When correlation is close to 1.
+#   This means that there is a strong relationship between your two variables. This means that changes 
+#   in one variable are strongly correlated with changes in the secondvariable. When correlation is 
+#   very close to 1 we can conclude that there is a strong relationship between these two variables. 
+# When correlation is close to 0.
+#   This means that there is a weak relationship between your two variables. 
+#   This means that changes in one variable are not correlated with changes in the second variable. 
+#   If correlation were 0.01, we could conclude that our variables were not strongly correlated.
+# When positive (+).
+#   This means that as one variable increases in value, the second variable also increase in value. 
+#   Similarly, as one variable decreases in value, the second variable also decreases in value. 
+#   This is called a positive correlation. 
+# When negative (-).
+#   This means that as one variable increases in value, the second variable decreases in value. 
+#   This is called a negative correlation. 
+
+# compute all pair-wise correlations between numeric variables with:
+
+numeric_corr <-  cor(loan_train[c("loan_amnt", "int_rate", "annual_inc", "emp_length", "dti",
+                 "delinq_2yrs", "revol_util", "total_acc", "longest_credit_length")])
+
+# https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html
+# http://www.sthda.com/english/wiki/correlation-matrix-a-quick-start-guide-to-analyze-format-and-visualize-a-correlation-matrix-using-r-software
+# Displayed graphically: Positive correlations are displayed in blue and negative correlations 
+# in red color. Color intensity and the size of the circle are proportional to 
+# the correlation coefficients. In the right side of the correlogram, the 
+# legend color shows the correlation coefficients and the corresponding colors.
+
+library(corrplot)
+
+corrplot(numeric_corr, method = "circle", order = "alphabet",  tl.srt = 45,  sig.level = 0.01, insig = "blank", type = "lower")
+corrplot(numeric_corr, method = "number", order = "alphabet",  tl.srt = 45,  sig.level = 0.01, insig = "blank", type = "lower")
+
+# conclusion: None of the numeric varaibles are excessively correlated that require additional management
+
+
+##################################################################################
+# 5 e): Updated model with only the significant variables
+##################################################################################
+
+# numeric only
+LoanModel00 = glm (bad_loan ~ loan_amnt + int_rate + annual_inc + emp_length + dti + delinq_2yrs +
+                     revol_util + total_acc + longest_credit_length,
+                   data=loan_train, family="binomial")
+
+summary(LoanModel00)
+
+# removing variables that are no longer significant when combined, namely: emp_length
+
+LoanModel00 = glm (bad_loan ~ loan_amnt + int_rate + annual_inc +  dti + delinq_2yrs +
+                     revol_util + total_acc + longest_credit_length, 
+                   data=loan_train, family="binomial")
+
+summary(LoanModel00)
+
+# adding non-numerics
+
+LoanModel00 = glm (bad_loan ~ loan_amnt + int_rate + annual_inc + dti + delinq_2yrs +
+                     revol_util + total_acc + longest_credit_length + term + purpose +
+                     home_ownership + verification_status,
+                   data=loan_train, family="binomial")
+
+summary(LoanModel00)
+
+
+# removing variables that are no longer significant when combined, namely: verification_status
+
+LoanModel00 = glm (bad_loan ~ loan_amnt + int_rate + annual_inc + dti + delinq_2yrs +
+                     revol_util + total_acc + longest_credit_length + term + purpose +
+                     home_ownership,
+                   data=loan_train, family="binomial")
+
+summary(LoanModel00)
+
+
+
+######################################################################
+### 6 Model Validation
+######################################################################
+
+
+######################################################################
+### 6 a) Binary Classification Confusion Matrix
+### Shows us the number of correct and incorrect predictions
+### make by the classification moeel compared to the 
+### actual outcomes (e.g. test dataset)
+######################################################################
+
+# See https://www.youtube.com/watch?v=ynRhJsX38Tw
+
+# TP = True Positive    : predicted positive, test positive
+# FP = False Positive   : predicted positive, test negative
+# TN = True Negative    : predicted negative, test positive
+# FN = False Negative   : predicted negative, test negative 
+
+# For example, the false positives, or FP, are the number of data points for which we 
+# predict bad loans, but they're actually good candidates. 
+# And the false negatives, or FN, are the number of data points for which we predict good candidates, 
+# but they're actually poor loan candidates.
+
+# On one hand, this customer is a bank, and could assume the preference is to minimize the number of 
+# bad loans, so we pick a large threshold value t, which will predict bad loan case rarely  
+# 0 / 1 = true outcome. 1 = Bad Loan, 0 = Good loan
+# FALSE / TRUE = predicted outcome
+
+# In medical diagnosis, test sensitivity is the ability of a test to correctly identify those 
+# with the disease (true positive rate), whereas test specificity is the ability of the test 
+# to correctly identify those without the disease (true negative rate).
+# Thus sensitivity quantifies the avoiding of false negatives, as specificity does for false 
+# positives.
+
+# However, higher risk customers also allow for the bank to charge higher interest rates, which in 
+# turn drives more profit, but must be balanced against loss created by a bad loan.
+
+predictTest = predict(LoanModel00, type="response", newdata=loan_test)
+
+### t > 0.65
+table(loan_test$bad_loan, predictTest> .65)
+
+# results with t > .65:
+#   FALSE  TRUE
+# 0 33492    11
+# 1  7478     8
+
+### t > 0.5
+table(loan_test$bad_loan,predictTest>.5)
+
+# results with t > .5:
+#   FALSE  TRUE
+# 0 33204   299
+# 1  7194   292
+
+### t = 0.45
+table(loan_test$bad_loan, predictTest > .45)
+#   FALSE  TRUE
+# 0 32890   613
+# 1  6951   535
+
+# Analsis for t > .65
+# TP: For good loan (0), we predict FALSE (e.g. good loan) = 33,492 
+# TN: For bad loan (1), we predict TRUE (e.g. bad loan) = 8
+# FP: We make 1 mistake where we predict a good loan (FALSE) and it is actually bad
+# FN: We make 7478 mistakes where we precict a bad loan (FALSE) which is actually good (1) 
+
+# A model with a higher threshold will have a higher sensitivity and a lower specificity
+
+# Sensitivity = TP / (TP + FN) = True Positive Rate
+sensitivity <- (33492 / (33492 + 8))
+# sens = 0.9999
+# Sensitivity = TN / (TN + FP) = True Negative Rate
+specificity <- (2 / (2 + 33390))
+# specificity = 0.0001
+
+
+
+###############################################################################################
+# 6 b) A Receiver Operator Characteristic (ROC) curve for selecting the appropriate t threshold
+# The ROC chart shows the False Positive Rate on the X-Axis,
+# against the True Positive Rate (sensistivity) on the Y-Axis
+###############################################################################################
+
+# Selecting Thresholds
+install.packages("ROCR")
+library (ROCR)
+
+# http://thestatsgeek.com/2014/05/05/area-under-the-roc-curve-assessing-discrimination-in-logistic-regression/
+
+ROCRpred = prediction(predictTest, loan_test$bad_loan)
+ROCRperf = performance(ROCRpred, "tpr", "fpr")
+plot (ROCRperf, colorize = TRUE,print.cutoffs.at=seq(0,1,0.05), text.adj=c(-0.2,1.7))
+
+# You can compute the test set Area Under the Curve (AUC) by running the following two commands in R:
+# The area under the ROC curve is often used as a measure of quality of
+# the classification model - random model has an area under the curve
+# equal to .5, a perfect classifier is equal to 1
+
+auc = as.numeric(performance(ROCRpred, "auc")@y.values)
+auc
+
+# Test area under curve (AUC) = 69.61%
+
+
+##################################################################################
+#
+# Review our model against the our training data to compare
+# 
+###################################################################################
+
+predictTrain = predict(LoanModel00, type="response", newdata=loan_train)
+ROCRpredTrain = prediction(predictTrain, loan_train$bad_loan)
+ROCRperfTrain = performance(ROCRpredTrain, "tpr", "fpr")
+plot (ROCRperfTrain, colorize = TRUE,print.cutoffs.at=seq(0,1,0.05), text.adj=c(-0.2,1.7))
+auc = as.numeric(performance(ROCRperfTrain, "auc")@y.values)
+auc
+# Training area under curve (AUC) = 69.56%
+ 
+
+
+#######################################################################################################
+## 
+## 7. Model Simplification: Can we remove variables (e.g. simplify the model) and improve or at 
+##                          least maintain sufficiently predictive?
+##                          
+#######################################################################################################
+
+# remove the less significant variables, namely:home_ownership, longest_credit_length, delinq_2yrs
+
+LoanModel00 = glm (bad_loan ~ loan_amnt + int_rate + annual_inc + dti +
+                     revol_util + total_acc + term + purpose,
+                   data=loan_train, family="binomial")
+
+summary(LoanModel00$term)
+
+# Test area under curve (AUC) = 69.58%, a negigible drop from 69.61% in exchange for a simplification.
+
+
 
 
 #############################################################################################
-# 2. Exploration
+# 8. Graphic Exploration
 #############################################################################################
 
-
-# various views of the loan data
-dim(loan)
-View(loan)
-summary(loan)
+install.packages("ggplot2")
+library("ggplot2")
 
 qplot(x=loan_amnt,y=annual_inc,data=loan)
 
+# sample: how do higher interest rates vs. loan amount affect bad loans?
+ggplot (aes(x=int_rate,y=loan_amnt),data=loan) +
+  geom_jitter(alpha = 1/10, aes(color = loan$bad_loan)) +
+  coord_cartesian(ylim = c(0, 40000))
 
-ggplot (aes(x=loan_amnt,y=annual_inc),data=loan) +
-  geom_point(alpha= 0.1) +
-  geom_line(linetype = 1, stat = 'summary', fun.y = mean, color = 'blue') +
-  coord_cartesian(xlim = c(0, 35000), ylim = c(0,185000)) +
-  facet_grid(~bad_loan)
+library(PerformanceAnalytics)
 
-ggplot (aes(x=loan_amnt,y=purpose),data=loan) +
-  geom_point(alpha= 0.1) +
-  coord_cartesian(xlim = c(0, 35000)) +
-  facet_grid(~bad_loan)
+# Scatterplot Matrices for interesting variables
+library(car)
+scatterplotMatrix(~loan_amnt+int_rate|bad_loan, data=loan_test,
+                   main="Bad Loan vs. Loan Amount")
 
-ggplot (aes(x=loan_amnt),data=loan) +
-  geom_histogram () +
-  coord_cartesian(xlim = c(0, 35000)) +
-  facet_grid(~bad_loan)
+# Scatterplot Matrices from the glus Package 
+library(gclus)
+dta.r <- abs(cor(dta)) # get correlations
+dta.col <- dmat.color(dta.r) # get colors
+# reorder variables so those with highest correlation
+# are closest to the diagonal
+dta.o <- order.single(dta.r) 
+cpairs(dta, dta.o, panel.colors=dta.col, gap=.5,
+       main="Variables Ordered and Colored by Correlation" )
+
+# Note: Somewhat unexpectedly, annual income is not a significant predictor of whether a customer
+# will be a bad loan candidate. In looking at this basic visulization, it seems that bad loans are 
+# occuring at all income levels and all regions
+
+ggplot (aes(x=loan_amnt,y=annual_inc),data=loan_train) +
+  geom_jitter(alpha = 1/10, aes(color = loan_train$bad_loan)) +
+  coord_trans(y = "log10") 
+
+ggplot (aes(x=addr_state,y=loan_amnt),data=loan_train) +
+  geom_jitter(alpha = 1/10, aes(color = loan_train$bad_loan))
 
 
+###########################################################################
+## Are some regions of country more prone to bad loans than others?
+############################################################################
+# https://flowingdata.com/2010/11/23/how-to-make-bubble-charts/
+# http://www.r-bloggers.com/mapping-with-ggplot-create-a-nice-choropleth-map-in-r/
+# https://trinkerrstuff.wordpress.com/2013/07/05/ggplot2-chloropleth-of-supreme-court-decisions-an-tutorial/
+# https://www.youtube.com/watch?v=vVAMLZXCPf8&list=PLa4VFIBUKrgLao-DalwedOCiq9RV6MPk9&index=14
+
+install.packages("maps")
+states_map<-map_data("state")
+
+
+
+
+cor(loan_train[c("loan_amnt", "term", "int_rate", "annual_inc", 
+                 "dti", "delinq_2yrs", "revol_util", "total_acc", "longest_credit_length")])
+
+
+############################################################################################
+# viewing the correlations
+# https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html
+# http://www.sthda.com/english/wiki/correlation-matrix-a-quick-start-guide-to-analyze-format-and-visualize-a-correlation-matrix-using-r-software
+############################################################################################
+
+dta <- loan_train[c("loan_amnt", "term", "int_rate", "annual_inc", 
+                    "dti", "delinq_2yrs", "revol_util", "total_acc", "longest_credit_length")] # get data 
+
+
+
+
+
+
+# Correlogram
+library(corrgram) 
+col.corrgram <- function(ncol){   
+  colorRampPalette(c("darkgoldenrod4", "burlywood1",
+                     "darkkhaki", "darkgreen"))(ncol)} 
+corrgram(loan_train, order=TRUE, lower.panel=panel.shade, 
+         upper.panel=panel.pie, text.panel=panel.txt, 
+         main="Correlogram of Bad Loans")
+
+
+
+
+
+
+######################################################################
+### 
+### 
+######################################################################
+
+
+
+
+
+
+
+#################################################################################################
+# Model 2  CART - Classification and Regression Trees
+#################################################################################################
+
+# logistic regression models are not easily interpretable.
+# The model coefficients in logistic regression indicate the importance and relative effect of variables,
+# but do not give a simple explanation of how a decision is made.
+
+
+# This method builds what is called a tree by splitting on the values of the independent variables.
+# To predict the outcome for a new observation or case, you can follow the splits in the tree and at the end,
+# you predict the most frequent outcome in the training set that followed the same path.
+
+# Some advantages of CART are that it does not assume a linear model, like logistic regression
+# or linear regression, and it's a very interpretable model.
+
+# install additional required packages/libraries
+install.packages("rpart")
+library(rpart)
+install.packages("rpart.plot")
+library (rpart.plot)
+
+# Build Classification Tree (CART)
+# The first one is method = "class". This tells rpart to build a classification tree, instead of
+# a regression tree. The last argument we'll give is minbucket = 25. This limits the tree so that it doesn't
+# overfit to our training set.
+
+# http://trevorstephens.com/post/72923766261/titanic-getting-started-with-r-part-3-decision
+
+?rpart 
+
+# without non-numeric values
+LoanTree = rpart (bad_loan~loan_amnt+int_rate+emp_length+annual_inc+
+                    dti+delinq_2yrs+revol_util+total_acc+longest_credit_length,
+                    data=loan_train, method = "class", minbucket = 250)
+
+prp(LoanTree)
+
+
+
+# Logistic Regression, CART, and Random Forest are all designed to be used 
+# to predict whether or not someone has a heart attack, since this is a 
+# classification problem. Linear regression would be appropriate for a problem 
+# with a continuous outcome, such as the amount of time until someone has a 
+# heart attack. In this lecture, we'll use random forest, but the other 
+# methods could be used too.
+
+# k-means clustering.
+# The broad description of the algorithm is as follows.
+# 1. We first specify the number of clusters k.
+# 2. Then we randomly assign each data point to a cluster.
+# 3. We then compute the cluster centroids.
+# 4. We re-assign each point to the closest cluster centroid.
+# 5. We then re-compute the cluster centroids,
+# 6. repeat steps 4 and 5 until no improvement is made.
 
