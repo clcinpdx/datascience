@@ -23,9 +23,8 @@ getwd()
 setwd ('C:/Users/crcalder/Google Drive/eBay/Data-Science/datascience/capstone')
 
 # create the loan dataframe from the loan.csv data file
-loan  <- read.csv ("loan.csv", sep = ',', header = TRUE, stringsAsFactors = FALSE)
 
-str (loan)
+loan  <- read.csv ("loan.csv", sep = ',', header = TRUE, stringsAsFactors = FALSE)
 
 # Description of Variables:
 # Source: https://www.lendingclub.com/info/download-data.action
@@ -66,6 +65,7 @@ str (loan)
 #
 # verification_status   (chr)
 
+
 #############################################################################################
 # 2. Wrangle: Convert data to numeric or factors where needed, inpute missing values
 #############################################################################################
@@ -98,8 +98,16 @@ levels(loan$addr_state) <- c(
    #   OR        PA          RI        SC      SD        TN      TX     UT     VA       VT       WA      WI        WV     WY #
      "West","Northeast","Northeast","South","Midwest","South","South","West","South","Midwest","West","Midwest","South","West")
 
+# while it seems possible to further create dummy variables, it doesn't seem to make sense 
+# since we are interested in understanding if the place someone lives is relevant.
 
-# 2d) factor and group purpoe 
+# loan$state_west <-  as.factor(ifelse(loan$addr_state=="West", 1, 0))
+# loan$state_south <- as.factor(ifelse(loan$addr_state=="South", 1, 0))
+# loan$state_northeast <- as.factor(ifelse(loan$addr_state=="Northeast", 1, 0))
+# loan$state_midwest  <- as.factor(ifelse(loan$addr_state=="Midwest", 1, 0))
+
+
+# 2d) factor and simplify purpoe to a more manageable number (3)
 loan$purpose <- as.factor (loan$purpose)
 levels(loan$purpose) <- c (
    #   car    credit_card debt_consolidation educational home_improvement house   major_purchase   medical #
@@ -107,19 +115,33 @@ levels(loan$purpose) <- c (
     # moving   other renewable_energy small_business vacation   wedding
     "shelter","other",  "shelter",     "other",  "consumer","consumer")
 
+# loan$purpose_consumer <-  as.factor(ifelse(loan$purpose=="consumer", 1, 0))
+# loan$purpose_other <- as.factor(ifelse(loan$addr_state=="other", 1, 0))
+# loan$purpose_shelter <- as.factor(ifelse(loan$addr_state=="shelter", 1, 0))
+
+
 
 # 2e) factor verification_status
+
 loan$verification_status <- as.factor(loan$verification_status)
+
+# loan$vstatus_verified <- as.factor(ifelse(loan$verification_status=="verified", 1, 0))
+# loan$vstatus_notverified <- as.factor(ifelse(loan$verification_status=="not verified", 1, 0))
+
 
 # 2f) factor home_ownership
 loan$home_ownership <- as.factor(loan$home_ownership)
 levels(loan$home_ownership) <- c ("other","mortgage","other","other","other","rent")
-str(loan$home_ownership)
+
+# loan$homeown_other <-  as.factor(ifelse(loan$home_ownership=="other", 1, 0))
+# loan$homeown_mort <- as.factor(ifelse(loan$home_ownership=="mortgage", 1, 0))
+# loan$homeown_rent <- as.factor(ifelse(loan$home_ownership=="rent", 1, 0))
+
 
 
 # 2g) Remove outliers from the dataset
 
-# note: with outliers, annual_inc results in a glm.fit warning for fitted probabilites numbericall 0 or 1 occured
+# note: with outliers, annual_inc results in a glm.fit warning for fitted probabilites numerical 0 or 1 occured
 # http://stats.stackexchange.com/questions/11109/how-to-deal-with-perfect-separation-in-logistic-regression
 # http://www.ats.ucla.edu/stat/mult_pkg/faq/general/complete_separation_logit_models.htm
 
@@ -129,9 +151,11 @@ str(loan$home_ownership)
 #     ii) specifically in the annual income data, with a Max value of $7,142,000  
           summary (loan$annual_inc)
           big_income <- subset(loan,loan$annual_inc >= 1000000)
-#     iii) 27 observatiosn have over $1,000,000 in income. Let's exclude them from this set since they would likely need to be 
-#          considered separately for a loan
+#     iii) 27 observatiosn have over $1,000,000 in income. We will exclude them from this set since they would  
+#          likely need to be considered separately for a loan anyhow
           loan <- subset(loan,loan$annual_inc < 1000000)
+#      iv) remove temp matrix big_income          
+          remove (big_income)
 
 
 
@@ -160,18 +184,15 @@ apply(completedData,2,pMiss)
 loan <- complete(tempData,1)
 apply(loan,2,pMiss)
 
-# examine the datasets 
-library(lattice)
-densityplot(tempData)
-
-# http://www.programiz.com/r-programming/strip-chart
-# http://www.inside-r.org/packages/cran/mice/docs/stripplot
-stripplot(tempData, pch = 20, cex = 1.2)
-
+remove (tempData)
 
 # confirm new loan dataset has no N/A's
 pMiss <- function(x){sum(is.na(x))/length(x)*100}
 apply(loan,2,pMiss)
+
+### ?????????????????????????????????????????????????????????????????????????
+## Question for Anirban: Not clear to me how to blend the model made from m=5, so I used m=1
+
 
 
 #############################################################################################
@@ -251,7 +272,6 @@ LoanModBi09 = glm (bad_loan ~ longest_credit_length, data=loan_train, family="bi
 Binomial_Results_Summary [9,] <- c("longest_credit_length", coef(summary(LoanModBi09))[2,"Pr(>|z|)"], "")
 Binomial_Results_Summary [9,3] <- codes[findInterval(Binomial_Results_Summary[9,2], ranges)]
 
-
 ##################################################################################
 # 5 c): chi-squared tests information for non-numeric variables:
 ##################################################################################
@@ -328,6 +348,7 @@ Binomial_Results_Summary
 numeric_corr <-  cor(loan_train[c("loan_amnt", "int_rate", "annual_inc", "emp_length", "dti",
                  "delinq_2yrs", "revol_util", "total_acc", "longest_credit_length")])
 
+
 # https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html
 # http://www.sthda.com/english/wiki/correlation-matrix-a-quick-start-guide-to-analyze-format-and-visualize-a-correlation-matrix-using-r-software
 # Displayed graphically: Positive correlations are displayed in blue and negative correlations 
@@ -343,6 +364,11 @@ corrplot(numeric_corr, method = "number", order = "alphabet",  tl.srt = 45,  sig
 # conclusion: None of the numeric varaibles are excessively correlated that require additional management
 
 
+### ?????????????????????????????????????????????????????????????????????????
+## Question for Anirban: This is a cool visual, but it is not clear to me how to include 
+##                       non-numeric (e.g. factors in this)
+
+
 ##################################################################################
 # 5 e): Updated model with only the significant variables
 ##################################################################################
@@ -356,6 +382,12 @@ summary(LoanModel00)
 
 # removing variables that are no longer significant when combined, namely: emp_length
 
+### ?????????????????????????????????????????????????????????????????????????
+## Question for Anirban: Not clear to me if this is the right thing to remove - should this be kept until 
+##                       I add in factor variables?
+
+
+
 LoanModel00 = glm (bad_loan ~ loan_amnt + int_rate + annual_inc +  dti + delinq_2yrs +
                      revol_util + total_acc + longest_credit_length, 
                    data=loan_train, family="binomial")
@@ -364,22 +396,22 @@ summary(LoanModel00)
 
 # adding non-numerics
 
-LoanModel00 = glm (bad_loan ~ loan_amnt + int_rate + annual_inc + dti + delinq_2yrs +
+LoanModel01 = glm (bad_loan ~ loan_amnt + int_rate + annual_inc + dti + delinq_2yrs +
                      revol_util + total_acc + longest_credit_length + term + purpose +
                      home_ownership + verification_status,
                    data=loan_train, family="binomial")
 
-summary(LoanModel00)
+summary(LoanModel01)
 
 
 # removing variables that are no longer significant when combined, namely: verification_status
 
-LoanModel00 = glm (bad_loan ~ loan_amnt + int_rate + annual_inc + dti + delinq_2yrs +
+LoanModel02 = glm (bad_loan ~ loan_amnt + int_rate + annual_inc + dti + delinq_2yrs +
                      revol_util + total_acc + longest_credit_length + term + purpose +
                      home_ownership,
                    data=loan_train, family="binomial")
 
-summary(LoanModel00)
+summary(LoanModel02)
 
 
 
@@ -421,7 +453,7 @@ summary(LoanModel00)
 # However, higher risk customers also allow for the bank to charge higher interest rates, which in 
 # turn drives more profit, but must be balanced against loss created by a bad loan.
 
-predictTest = predict(LoanModel00, type="response", newdata=loan_test)
+predictTest = predict(LoanModel02, type="response", newdata=loan_test)
 
 ### t > 0.65
 table(loan_test$bad_loan, predictTest> .65)
@@ -495,7 +527,7 @@ auc
 # 
 ###################################################################################
 
-predictTrain = predict(LoanModel00, type="response", newdata=loan_train)
+predictTrain = predict(LoanModel02, type="response", newdata=loan_train)
 ROCRpredTrain = prediction(predictTrain, loan_train$bad_loan)
 ROCRperfTrain = performance(ROCRpredTrain, "tpr", "fpr")
 plot (ROCRperfTrain, colorize = TRUE,print.cutoffs.at=seq(0,1,0.05), text.adj=c(-0.2,1.7))
@@ -503,6 +535,9 @@ auc = as.numeric(performance(ROCRperfTrain, "auc")@y.values)
 auc
 # Training area under curve (AUC) = 69.56%
  
+
+
+
 
 
 #######################################################################################################
@@ -514,19 +549,45 @@ auc
 
 # remove the less significant variables, namely:home_ownership, longest_credit_length, delinq_2yrs
 
-LoanModel00 = glm (bad_loan ~ loan_amnt + int_rate + annual_inc + dti +
+LoanModel03 = glm (bad_loan ~ loan_amnt + int_rate + annual_inc + dti +
                      revol_util + total_acc + term + purpose,
                    data=loan_train, family="binomial")
 
-summary(LoanModel00$term)
+summary(LoanModel03$term)
 
+predictTest = predict(LoanModel03, type="response", newdata=loan_test)
+ROCRpred = prediction(predictTest, loan_test$bad_loan)
+ROCRperf = performance(ROCRpred, "tpr", "fpr")
+plot (ROCRperf, colorize = TRUE,print.cutoffs.at=seq(0,1,0.05), text.adj=c(-0.2,1.7))
+auc = as.numeric(performance(ROCRpred, "auc")@y.values)
+auc
 # Test area under curve (AUC) = 69.58%, a negigible drop from 69.61% in exchange for a simplification.
 
 
 
 
+
 #############################################################################################
-# 8. Graphic Exploration
+# 8. Information Value and Weight of Evidence
+#############################################################################################
+
+# http://multithreaded.stitchfix.com/blog/2015/08/13/weight-of-evidence/
+  
+library(woe)
+
+# Calculate Information Value
+# We can use function iv.mult() to calculate Information Value for all variables in data frame:
+  
+  iv.mult(loan,"gb",TRUE)
+  iv.plot.summary(iv.mult(loan,"gb",TRUE))
+
+
+
+
+
+
+#############################################################################################
+# 9. Graphic Exploration
 #############################################################################################
 
 install.packages("ggplot2")
@@ -566,6 +627,14 @@ ggplot (aes(x=loan_amnt,y=annual_inc),data=loan_train) +
 
 ggplot (aes(x=addr_state,y=loan_amnt),data=loan_train) +
   geom_jitter(alpha = 1/10, aes(color = loan_train$bad_loan))
+
+# examine the datasets 
+# library(lattice)
+# densityplot(tempData)
+
+# http://www.programiz.com/r-programming/strip-chart
+# http://www.inside-r.org/packages/cran/mice/docs/stripplot
+# stripplot(tempData, pch = 20, cex = 1.2)
 
 
 ###########################################################################
