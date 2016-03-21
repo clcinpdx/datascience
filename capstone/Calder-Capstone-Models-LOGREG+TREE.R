@@ -199,7 +199,7 @@ loan <- subset(loan, select = -int_rate)
 
 table (loan$bad_loan)
 #   0      1 
-# 133971  30016 
+# 133896  30011 
 
 loan_bad <- subset (loan, loan$bad_loan == '1' )
 loan_good <- subset (loan,loan$bad_loan == '0')
@@ -223,28 +223,31 @@ loan_train_bad <- loan_bad [train_ind_bad, ]
 loan_train_good <- loan_good [train_ind_good, ]
 loan_train <- rbind (loan_train_good,loan_train_bad)
 
+# create an "unbalanced" test set with good and bad loans
 loan_test_bad <- loan_bad [-train_ind_bad, ]
 loan_test_good <- loan_good [-train_ind_good, ]
 loan_test <- rbind (loan_test_good,loan_test_bad)
 
+## create an "balanced" test set between good and bad loans ##
+# loan_test_bad <- loan_bad [-train_ind_bad, ]
+# balanced_smp_size <- nrow(loan_test_bad)
+# test_good_balanced_ind <- sample(seq_len(nrow(loan_good)), size = balanced_smp_size)
+# loan_test_good_balanced <- loan_good [test_good_balanced_ind, ]
+# loan_test <- rbind (loan_test_good_balanced,loan_test_bad)
+# remove (balanced_smp_size,test_good_balanced_ind,loan_test_good_balanced)
+
+
 table (loan_train$bad_loan)
 #   0     1 
-# 22512 22512
+# 22508 22508
 
 table (loan_test$bad_loan)
 #   0      1 
-# 111459   7504
+# 111459   7503
 
 # cleanup
-remove (loan_test_bad)
-remove(loan_test_good)
-remove (loan_train_bad)
-remove (loan_train_good)
-remove (loan_bad)
-remove (loan_good)
-remove (train_ind_bad)
-remove (train_ind_good)
-remove (smp_size)
+remove (loan_test_bad, loan_test_good,loan_train_bad,loan_train_good)
+remove (loan_bad, loan_good,train_ind_bad, train_ind_good, smp_size)
 
 
 
@@ -485,42 +488,61 @@ summary(LoanModel00)
 
 predictTest = predict(LoanModel00, type="response", newdata=loan_test)
 
+t_Summary <- matrix (nrow=6, ncol=7)
+colnames(t_Summary) <- c("Threshold Value","TP","FP","TN","FN", "Sensitivity", "Specificity")
+
+
+### t > 0.70
+tt70 <- table(loan_test$bad_loan, predictTest> .70)
+t_Summary [1,] <- c("t > .70",
+                    tt70[1,"FALSE"],tt70[2,"FALSE"],tt70[2,"TRUE"],tt70[1,"TRUE"],
+                    round((tt70[1,"FALSE"]/(tt70[1,"FALSE"]+tt70[1,"TRUE"])),4),
+                    round((tt70[2,"TRUE"]/(tt70[2,"TRUE"]+tt70[2,"FALSE"])),4))
+
 ### t > 0.65
-table(loan_test$bad_loan, predictTest> .65)
+tt65 <- table(loan_test$bad_loan, predictTest> .65)
+t_Summary [2,] <- c("t > .65",
+                    tt65[1,"FALSE"],tt65[2,"FALSE"],tt65[2,"TRUE"],tt65[1,"TRUE"],
+                    round((tt65[1,"FALSE"]/(tt65[1,"FALSE"]+tt65[1,"TRUE"])),4),
+                    round((tt65[2,"TRUE"]/(tt65[2,"TRUE"]+tt65[2,"FALSE"])),4))
 
-# results with t > .65:
-#   FALSE  TRUE
-# 0 33494
-# 1  7496
+### t > 0.60
+tt60 <- table(loan_test$bad_loan, predictTest> .60)
+t_Summary [3,] <- c("t > .60",
+                    tt60[1,"FALSE"],tt60[2,"FALSE"],tt60[2,"TRUE"],tt60[1,"TRUE"],
+                    round((tt60[1,"FALSE"]/(tt60[1,"FALSE"]+tt60[1,"TRUE"])),4),
+                    round((tt60[2,"TRUE"]/(tt60[2,"TRUE"]+tt60[2,"FALSE"])),4))
 
-### t > 0.5
-table(loan_test$bad_loan,predictTest>.5)
+### t > 0.55
+tt55 <- table(loan_test$bad_loan,predictTest>.55)
+t_Summary [4,] <- c("t > .55",
+                    tt55[1,"FALSE"],tt55[2,"FALSE"],tt55[2,"TRUE"],tt55[1,"TRUE"],
+                    round((tt55[1,"FALSE"]/(tt55[1,"FALSE"]+tt55[1,"TRUE"])),4),
+                    round((tt55[2,"TRUE"]/(tt55[2,"TRUE"]+tt55[2,"FALSE"])),4))
 
-# results with t > .5:
-#               FALSE (good loan)  TRUE (bad loan)   <- prediction
-# 0 (good loan)   33448             46
-# 1 (bad loan)    7459              37
+### t > 0.50
+tt50 <- table(loan_test$bad_loan,predictTest>.50)
+t_Summary [5,] <- c("t > .50",
+                    tt50[1,"FALSE"],tt50[2,"FALSE"],tt50[2,"TRUE"],tt50[1,"TRUE"],
+                    round((tt50[1,"FALSE"]/(tt50[1,"FALSE"]+tt50[1,"TRUE"])),4),
+                    round((tt50[2,"TRUE"]/(tt50[2,"TRUE"]+tt50[2,"FALSE"])),4))
 
 ### t = 0.45
-table(loan_test$bad_loan, predictTest > .45)
-#   FALSE  TRUE
-# 0 33288   206
-# 1  7327   169
+tt45 <- table(loan_test$bad_loan, predictTest > .45)
+t_Summary [6,] <- c("t > .45",
+                    tt45[1,"FALSE"],tt45[2,"FALSE"],tt45[2,"TRUE"],tt45[1,"TRUE"],
+                    round((tt45[1,"FALSE"]/(tt45[1,"FALSE"]+tt45[1,"TRUE"])),4),
+                    round((tt45[2,"TRUE"]/(tt45[2,"TRUE"]+tt45[2,"FALSE"])),4))
 
-# Analsis for t > .5
-# TP: For good loan (0), we predict FALSE (e.g. good loan) = 33448 
-# TN: For bad loan (1), we predict TRUE (e.g. bad loan) = 37
-# FP: Predict a good loan (FALSE) and it is actually bad = 7,459
-# FN: Precict a bad loan (FALSE) which is actually good = 46
+t_Summary
 
-# A model with a higher threshold will have a higher sensitivity and a lower specificity
+# specificity quantifies false positives. 
+# The false positives, or FP, are the number of times we predict bad loans, but they're actually good candidates. 
 
-# Sensitivity = TP / (TP + FN) = True Positive Rate
-sensitivity <- (33448 / (33448 + 46))
-# sens = 0.9986
-# Sensitivity = TN / (TN + FP) = True Negative Rate
-specificity <- (37 / (37 + 7459))
-# specificity = 0.0049
+# sensitivity quantifies the avoiding of false negatives, 
+# The false negatives, or FN, are the number of times we predict good loans, but they're actually bad loan candidates.
+
+
 
 
 ###############################################################################################
@@ -536,17 +558,41 @@ library (ROCR)
 # http://thestatsgeek.com/2014/05/05/area-under-the-roc-curve-assessing-discrimination-in-logistic-regression/
 predictTest = predict(LoanModel00, type="response", newdata=loan_test)
 ROCRpred = prediction(predictTest, loan_test$bad_loan)
-ROCRperf = performance(ROCRpred, "tpr", "fpr")
-plot (ROCRperf, colorize = TRUE,print.cutoffs.at=seq(0,1,0.05), text.adj=c(-0.2,1.7))
+ROCRperf = performance(ROCRpred, measure="tpr",x.measure="fpr")
+SSperf =  performance(ROCRpred, measure="sens", x.measure="spec")
+?performance
+# where tpr = true positive rate, or senstivity
+# where fpr = false positive rate, or specificity
+
+# Specially, True Negative is really low (< 1%). Not always 50% is the cutoff for probabilities. 
+# You need to check ROC curve to what's right cut-off (keeping True Positive and False Positive balanced). 
+# Accuracy wise, nearing 70% should be fine. But data has so many '0' classes and few '1' classes. 
+# So, if model predicts only '0' then also accuracy will come around 60-70%. But that's not intent of the model, 
+# your model should be able to predict '1' classes as well. That's why  True Negative is also important. 
+# Please try to improve it. Don't need to do lot of work, just take your best model and just work on that model. 
+
+# clear buffer to ensure plots display correctly
+dev.off()
+
+plot (ROCRperf, colorize = TRUE,print.cutoffs.at=seq(0,1,0.05), text.adj=c(-0.2,1.7),
+      main="Receiver Operator Characteristic (ROC) Curve", xlab="True Positive Rate", ylab="False Positive Rate")
 abline(a=0,b=1,lwd=2,lty=2,col="gray")
+
+plot (SSperf, colorize = TRUE,print.cutoffs.at=seq(0,1,0.05), text.adj=c(-0.2,1.7),
+      main="Sensitivity / Specificity Plots", xlab="tpr - sensitivity", ylab="tnr - specificity")
+abline(a=1,b=-1,lwd=2,lty=2,col="gray")
+
+
+
+?performance 
 
 # You can compute the test set Area Under the Curve (AUC) by running the following two commands in R:
 # The area under the ROC curve is often used as a measure of quality of
 # the classification model - random model has an area under the curve
 # equal to .5, a perfect classifier is equal to 1
 
-auc00 = as.numeric(performance(ROCRpred, "auc")@y.values)
-auc00
+aucROCR = as.numeric(performance(ROCRpred, "auc")@y.values)
+aucROCR
 
 # Test area under curve (AUC) = 66.032% (using matched bad/good training set)
 
@@ -736,8 +782,6 @@ Model_Results_Summary
 # http://www.r-bloggers.com/r-credit-scoring-woe-information-value-in-woe-package/
 
 
-
-
 #############################################################################################
 # 10. Graphic Exploration
 #############################################################################################
@@ -756,12 +800,3 @@ ggplot(loan, aes(x = term, y = annual_inc, fill = loan$addr_state,
   geom_boxplot() +
   coord_cartesian(ylim = c(0, 125000)) + 
   facet_wrap(~loan$bad_loan)
-
-hist(loan$annual_inc, 
-     main="Histogram for Annual Income"), 
-border="black", 
-col="red",
-breaks=500,
-prob = TRUE,
-axes=TRUE)
-lines(density(loan$annual_inc))
