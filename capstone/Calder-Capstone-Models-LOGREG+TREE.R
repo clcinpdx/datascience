@@ -271,42 +271,42 @@ remove (loan_bad, loan_good,train_ind_bad, train_ind_good, smp_size)
 # Create a matrix containing only the Variable, its P-Value, and the "significance"
 # for the numeric variables
 
-Binomial_Results_Summary <- matrix (nrow=18, ncol =3)
-colnames(Binomial_Results_Summary) <- c("Variable","P-Value", "significance")
+Binomial_Results_Summary <- matrix (nrow=18, ncol =4)
+colnames(Binomial_Results_Summary) <- c("Variable","Coefficient", "P-Value", "significance")
 ranges <- c(0, 0.001, 0.01, 0.05, 0.1)
 codes <- c("***" , "**","*", ".", " ")
 
 LoanModBi01 = glm (bad_loan ~ loan_amnt, data=loan_train, family="binomial")
-Binomial_Results_Summary [1,] <- c("Loan_amount", coef(summary(LoanModBi01))[2,"Pr(>|z|)"],"")
-Binomial_Results_Summary [1,3] <- codes[findInterval(Binomial_Results_Summary[1,2], ranges)]
+Binomial_Results_Summary [1,] <- c("Loan_amount", coef(summary(LoanModBi01))[2,"Estimate"], coef(summary(LoanModBi01))[2,"Pr(>|z|)"],"")
+Binomial_Results_Summary [1,4] <- codes[findInterval(Binomial_Results_Summary[1,3], ranges)]
 
 LoanModBi02 = glm (bad_loan ~ emp_length, data=loan_train, family="binomial")
-Binomial_Results_Summary [2,] <- c("emp_length", coef(summary(LoanModBi02))[2,"Pr(>|z|)"], "")
-Binomial_Results_Summary [2,3] <- codes[findInterval(Binomial_Results_Summary[2,2], ranges)]
+Binomial_Results_Summary [2,] <- c("emp_length", coef(summary(LoanModBi02))[2,"Estimate"], coef(summary(LoanModBi02))[2,"Pr(>|z|)"], "")
+Binomial_Results_Summary [2,4] <- codes[findInterval(Binomial_Results_Summary[2,3], ranges)]
 
 LoanModBi03 = glm (bad_loan ~ annual_inc, data=loan_train, family="binomial")
-Binomial_Results_Summary [3,] <- c("annual_inc", coef(summary(LoanModBi03))[2,"Pr(>|z|)"],"")
-Binomial_Results_Summary [3,3] <- codes[findInterval(Binomial_Results_Summary[3,2], ranges)]
+Binomial_Results_Summary [3,] <- c("annual_inc", coef(summary(LoanModBi03))[2,"Estimate"], coef(summary(LoanModBi03))[2,"Pr(>|z|)"],"")
+Binomial_Results_Summary [3,4] <- codes[findInterval(Binomial_Results_Summary[3,3], ranges)]
 
 LoanModBi04 = glm (bad_loan ~ dti, data=loan_train, family="binomial")
-Binomial_Results_Summary [4,] <- c("dti", coef(summary(LoanModBi04))[2,"Pr(>|z|)"], "")
-Binomial_Results_Summary [4,3] <- codes[findInterval(Binomial_Results_Summary[4,2], ranges)]
+Binomial_Results_Summary [4,] <- c("dti", coef(summary(LoanModBi04))[2,"Estimate"], coef(summary(LoanModBi04))[2,"Pr(>|z|)"], "")
+Binomial_Results_Summary [4,4] <- codes[findInterval(Binomial_Results_Summary[4,3], ranges)]
 
 LoanModBi05 = glm (bad_loan ~ delinq_2yrs, data=loan_train, family="binomial")
-Binomial_Results_Summary [5,] <- c("delinq_2yrs", coef(summary(LoanModBi05))[2,"Pr(>|z|)"], "")
-Binomial_Results_Summary [5,3] <- codes[findInterval(Binomial_Results_Summary[5,2], ranges)]
+Binomial_Results_Summary [5,] <- c("delinq_2yrs",coef(summary(LoanModBi05))[2,"Estimate"], coef(summary(LoanModBi05))[2,"Pr(>|z|)"], "")
+Binomial_Results_Summary [5,4] <- codes[findInterval(Binomial_Results_Summary[5,3], ranges)]
 
 LoanModBi06 = glm (bad_loan ~ revol_util, data=loan_train, family="binomial")
-Binomial_Results_Summary [6,] <- c("revol_util", coef(summary(LoanModBi06))[2,"Pr(>|z|)"], "")
-Binomial_Results_Summary [6,3] <- codes[findInterval(Binomial_Results_Summary[6,2], ranges)]
+Binomial_Results_Summary [6,] <- c("revol_util", coef(summary(LoanModBi06))[2,"Estimate"], coef(summary(LoanModBi06))[2,"Pr(>|z|)"], "")
+Binomial_Results_Summary [6,4] <- codes[findInterval(Binomial_Results_Summary[6,3], ranges)]
 
 LoanModBi07 = glm (bad_loan ~ total_acc, data=loan_train, family="binomial")
-Binomial_Results_Summary [7,] <- c("total_acc", coef(summary(LoanModBi07))[2,"Pr(>|z|)"], "")
-Binomial_Results_Summary [7,3] <- codes[findInterval(Binomial_Results_Summary[7,2], ranges)]
+Binomial_Results_Summary [7,] <- c("total_acc", coef(summary(LoanModBi07))[2,"Estimate"], coef(summary(LoanModBi07))[2,"Pr(>|z|)"], "")
+Binomial_Results_Summary [7,4] <- codes[findInterval(Binomial_Results_Summary[7,3], ranges)]
 
 LoanModBi08 = glm (bad_loan ~ longest_credit_length, data=loan_train, family="binomial")
-Binomial_Results_Summary [8,] <- c("longest_credit_length", coef(summary(LoanModBi08))[2,"Pr(>|z|)"], "")
-Binomial_Results_Summary [8,3] <- codes[findInterval(Binomial_Results_Summary[8,2], ranges)]
+Binomial_Results_Summary [8,] <- c("longest_credit_length", coef(summary(LoanModBi08))[2,"Estimate"], coef(summary(LoanModBi08))[2,"Pr(>|z|)"], "")
+Binomial_Results_Summary [8,4] <- codes[findInterval(Binomial_Results_Summary[8,3], ranges)]
 
 # Binomial for all the dummy variables created earlier
 
@@ -316,36 +316,36 @@ Binomial_Results_Summary [8,3] <- codes[findInterval(Binomial_Results_Summary[8,
 # loan$bankrpc_state_high
 
 LoanModBi09 = glm (bad_loan ~ bankrpc_state_low, data=loan_train, family="binomial")
-Binomial_Results_Summary [9,] <- c("bankrpc_state_low (dummy)", coef(summary(LoanModBi09))[2,"Pr(>|z|)"], "")
-Binomial_Results_Summary [9,3] <- codes[findInterval(Binomial_Results_Summary[9,2], ranges)]
+Binomial_Results_Summary [9,] <- c("bankrpc_state_low (dummy)",coef(summary(LoanModBi09))[2,"Estimate"], coef(summary(LoanModBi09))[2,"Pr(>|z|)"], "")
+Binomial_Results_Summary [9,4] <- codes[findInterval(Binomial_Results_Summary[9,3], ranges)]
 
 LoanModBi10 = glm (bad_loan ~ bankrpc_state_med, data=loan_train, family="binomial")
-Binomial_Results_Summary [10,] <- c("bankrpc_state_med (dummy)", coef(summary(LoanModBi10))[2,"Pr(>|z|)"], "")
-Binomial_Results_Summary [10,3] <- codes[findInterval(Binomial_Results_Summary[10,2], ranges)]
+Binomial_Results_Summary [10,] <- c("bankrpc_state_med (dummy)",coef(summary(LoanModBi10))[2,"Estimate"], coef(summary(LoanModBi10))[2,"Pr(>|z|)"], "")
+Binomial_Results_Summary [10,4] <- codes[findInterval(Binomial_Results_Summary[10,3], ranges)]
 
 LoanModBi11 = glm (bad_loan ~ bankrpc_state_medhigh, data=loan_train, family="binomial")
-Binomial_Results_Summary [11,] <- c("bankrpc_state_medhigh (dummy)", coef(summary(LoanModBi11))[2,"Pr(>|z|)"], "")
-Binomial_Results_Summary [11,3] <- codes[findInterval(Binomial_Results_Summary[11,2], ranges)]
+Binomial_Results_Summary [11,] <- c("bankrpc_state_medhigh (dummy)",coef(summary(LoanModBi11))[2,"Estimate"], coef(summary(LoanModBi11))[2,"Pr(>|z|)"], "")
+Binomial_Results_Summary [11,4] <- codes[findInterval(Binomial_Results_Summary[11,3], ranges)]
 
 LoanModBi12 = glm (bad_loan ~ bankrpc_state_high, data=loan_train, family="binomial")
-Binomial_Results_Summary [12,] <- c("bankrpc_state_high (dummy)", coef(summary(LoanModBi12))[2,"Pr(>|z|)"], "")
-Binomial_Results_Summary [12,3] <- codes[findInterval(Binomial_Results_Summary[12,2], ranges)]
+Binomial_Results_Summary [12,] <- c("bankrpc_state_high (dummy)",coef(summary(LoanModBi12))[2,"Estimate"], coef(summary(LoanModBi12))[2,"Pr(>|z|)"], "")
+Binomial_Results_Summary [12,4] <- codes[findInterval(Binomial_Results_Summary[12,3], ranges)]
 
 # loan$homeown_other 
 # loan$homeown_mort
 # loan$homeown_rent
 
 LoanModBi13 = glm (bad_loan ~ homeown_other, data=loan_train, family="binomial")
-Binomial_Results_Summary [13,] <- c("homeown_other (dummy)", coef(summary(LoanModBi13))[2,"Pr(>|z|)"], "")
-Binomial_Results_Summary [13,3] <- codes[findInterval(Binomial_Results_Summary[13,2], ranges)]
+Binomial_Results_Summary [13,] <- c("homeown_other (dummy)",coef(summary(LoanModBi13))[2,"Estimate"], coef(summary(LoanModBi13))[2,"Pr(>|z|)"], "")
+Binomial_Results_Summary [13,4] <- codes[findInterval(Binomial_Results_Summary[13,3], ranges)]
 
 LoanModBi14 = glm (bad_loan ~ homeown_mort, data=loan_train, family="binomial")
-Binomial_Results_Summary [14,] <- c("homeown_mort (dummy)", coef(summary(LoanModBi14))[2,"Pr(>|z|)"], "")
-Binomial_Results_Summary [14,3] <- codes[findInterval(Binomial_Results_Summary[14,2], ranges)]
+Binomial_Results_Summary [14,] <- c("homeown_mort (dummy)",coef(summary(LoanModBi14))[2,"Estimate"], coef(summary(LoanModBi14))[2,"Pr(>|z|)"], "")
+Binomial_Results_Summary [14,4] <- codes[findInterval(Binomial_Results_Summary[14,3], ranges)]
 
 LoanModBi15 = glm (bad_loan ~ homeown_rent, data=loan_train, family="binomial")
-Binomial_Results_Summary [15,] <- c("homeown_rent (dummy)", coef(summary(LoanModBi15))[2,"Pr(>|z|)"], "")
-Binomial_Results_Summary [15,3] <- codes[findInterval(Binomial_Results_Summary[15,2], ranges)]
+Binomial_Results_Summary [15,] <- c("homeown_rent (dummy)",coef(summary(LoanModBi15))[2,"Estimate"], coef(summary(LoanModBi15))[2,"Pr(>|z|)"], "")
+Binomial_Results_Summary [15,4] <- codes[findInterval(Binomial_Results_Summary[15,3], ranges)]
 
 ##################################################################################
 # 5 c): chi-squared tests information for non-numeric variables:
@@ -357,14 +357,14 @@ Binomial_Results_Summary [15,3] <- codes[findInterval(Binomial_Results_Summary[1
 
 # chi squared tests for the remaining five factor variables
 
-Binomial_Results_Summary [16,] <- c("term (factor)",chisq.test(loan_train$bad_loan,loan_train$term)$p.value, "")
-Binomial_Results_Summary [16,3] <- codes[findInterval(Binomial_Results_Summary[16,2], ranges)]
+Binomial_Results_Summary [16,] <- c("term (factor)","", chisq.test(loan_train$bad_loan,loan_train$term)$p.value, "")
+Binomial_Results_Summary [16,4] <- codes[findInterval(Binomial_Results_Summary[16,3], ranges)]
 
-Binomial_Results_Summary [17,] <- c("purpose (factor)",chisq.test(loan_train$bad_loan,loan_train$purpose)$p.value, "")
-Binomial_Results_Summary [17,3] <- codes[findInterval(Binomial_Results_Summary[17,2], ranges)]
+Binomial_Results_Summary [17,] <- c("purpose (factor)","", chisq.test(loan_train$bad_loan,loan_train$purpose)$p.value, "")
+Binomial_Results_Summary [17,4] <- codes[findInterval(Binomial_Results_Summary[17,3], ranges)]
 
-Binomial_Results_Summary [18,] <- c("vstatus_verified (factor)",chisq.test(loan_train$bad_loan,loan_train$vstatus_verified)$p.value, "")
-Binomial_Results_Summary [18,3] <- codes[findInterval(Binomial_Results_Summary[18,2], ranges)]
+Binomial_Results_Summary [18,] <- c("vstatus_verified (factor)","",chisq.test(loan_train$bad_loan,loan_train$vstatus_verified)$p.value, "")
+Binomial_Results_Summary [18,4] <- codes[findInterval(Binomial_Results_Summary[18,3], ranges)]
 
 
 ########################################################
@@ -445,7 +445,6 @@ LoanModel00 = glm (bad_loan ~ loan_amnt + annual_inc + dti + delinq_2yrs + revol
                    data=loan_train, family="binomial")
 
 summary(LoanModel00)
-
 
 
 ######################################################################
@@ -575,7 +574,7 @@ SSperf =  performance(ROCRpred, measure="sens", x.measure="spec")
 dev.off()
 
 plot (ROCRperf, colorize = TRUE,print.cutoffs.at=seq(0,1,0.05), text.adj=c(-0.2,1.7),
-      main="Receiver Operator Characteristic (ROC) Curve", xlab="True Positive Rate", ylab="False Positive Rate")
+      main="Receiver Operator Characteristic (ROC) Curve", xlab="False Positive Rate", ylab="True Positive Rate")
 abline(a=0,b=1,lwd=2,lty=2,col="gray")
 
 plot (SSperf, colorize = TRUE,print.cutoffs.at=seq(0,1,0.05), text.adj=c(-0.2,1.7),
@@ -775,28 +774,54 @@ Model_Results_Summary
 
 
 #############################################################################################
-# 9. Information Value and Weight of Evidence
-#############################################################################################
-
-# http://multithreaded.stitchfix.com/blog/2015/08/13/weight-of-evidence/
-# http://www.r-bloggers.com/r-credit-scoring-woe-information-value-in-woe-package/
-
-
-#############################################################################################
-# 10. Graphic Exploration
+# 9. EDA
 #############################################################################################
 
 install.packages("ggplot2")
 library("ggplot2")
-annual_inc + term
+dev.off()
 
-ggplot(loan, aes(x = term, y = annual_inc, fill = loan$bad_loan, 
-                 xlab = "1 = Bad Loan, 0 = Good loan", ylab = "Interest Rate")) + 
+### Discrete X, Continuous Y 
+
+ggplot(loan, aes(x = term, y = annual_inc, fill = loan$bad_loan), 
+                 xlab = "1 = Bad Loan, 0 = Good loan", ylab = "Annual Income", main = "Term vs. Annual Income") + 
   geom_boxplot() +
   coord_cartesian(ylim = c(0, 125000))
 
-ggplot(loan, aes(x = term, y = annual_inc, fill = loan$addr_state, 
+ggplot(loan, aes(x = term, y = loan_amnt, fill = loan$bad_loan, 
                  xlab = "1 = Bad Loan, 0 = Good loan", ylab = "Interest Rate")) + 
   geom_boxplot() +
-  coord_cartesian(ylim = c(0, 125000)) + 
-  facet_wrap(~loan$bad_loan)
+  coord_cartesian(ylim = c(0, 40000))
+
+ggplot(loan, aes(x = term, y = loan_amnt, fill = loan$bad_loan, 
+                 xlab = "1 = Bad Loan, 0 = Good loan", ylab = "Interest Rate")) + 
+  geom_bar() +
+  coord_cartesian(ylim = c(0, 40000))
+
+#### Continuous X, Continuous Y
+
+ggplot(loan, aes(x = emp_length, y = loan_amnt)) + 
+  geom_point() +
+  facet_wrap(~bad_loan)
+
+ggplot(loan, aes(x = emp_length, y = loan_amnt)) + 
+  geom_jitter() +
+  facet_wrap(~bad_loan)
+
+ggplot(loan, aes(x = annual_inc, y = total_acc)) + 
+  geom_jitter(alpha=1/20) +
+  facet_wrap(~bad_loan)
+
+(alpha = 1/20, shape =  21, fill = I('#F79420'))
+
+
+LoanModel00 = glm (bad_loan ~ loan_amnt + annual_inc + dti + delinq_2yrs + revol_util +
+                     total_acc + longest_credit_length + bankrpc_state_low +   
+                     bankrpc_state_high  + homeown_mort + homeown_rent + 
+                     term + purpose + vstatus_verified,
+                   data=loan_train, family="binomial")
+
+# The following variables will not be used: 
+#
+#             emp_length, bankrpc_state_med, 
+#             bankrpc_state_medhigh, homeown_other
