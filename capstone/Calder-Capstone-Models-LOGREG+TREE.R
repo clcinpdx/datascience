@@ -90,12 +90,12 @@ tempData <- mice(loan,m=1,maxit=25,meth='pmm',seed=500)
 loan <- complete(tempData,1)
 apply(loan,2,pMiss)
 
-remove (pMiss)
 
 # confirm new loan dataset has no N/A's
 pMiss <- function(x){sum(is.na(x))/length(x)*100}
 apply(loan,2,pMiss)
 
+remove (pMiss,tempData)
 
 #############################################################################################
 # 3. Wrangle: Convert data to numeric or factors where needed
@@ -446,6 +446,22 @@ LoanModel00 = glm (bad_loan ~ loan_amnt + annual_inc + dti + delinq_2yrs + revol
 
 summary(LoanModel00)
 
+LoanModel01 = glm (bad_loan ~ loan_amnt + annual_inc + dti + delinq_2yrs + revol_util +
+                     total_acc + longest_credit_length + bankrpc_state_low +   
+                     bankrpc_state_high  + homeown_mort + homeown_rent + 
+                     term + purpose + vstatus_verified,
+                   data=loan_train, family="binomial")
+
+summary(LoanModel01)
+
+LoanModel02 = glm (bad_loan ~ loan_amnt + annual_inc + dti + delinq_2yrs + revol_util +
+                     total_acc + longest_credit_length + bankrpc_state_low +   
+                     bankrpc_state_high  + homeown_mort + homeown_rent + 
+                     term + purpose + vstatus_verified,
+                   data=loan_train, family="binomial")
+
+summary(LoanModel02)
+
 
 ######################################################################
 ### 6 Model Validation
@@ -593,7 +609,7 @@ abline(a=1,b=-1,lwd=2,lty=2,col="gray")
 aucROCR = as.numeric(performance(ROCRpred, "auc")@y.values)
 aucROCR
 
-# Test area under curve (AUC) = 66.032% (using matched bad/good training set)
+# Test area under curve (AUC) = 66.18582% (using matched bad/good training set)
 
 #######################################################################################################
 ## 
@@ -602,7 +618,8 @@ aucROCR
 #   http://www.r-bloggers.com/classification-tree-models/
 #   http://trevorstephens.com/post/72923766261/titanic-getting-started-with-r-part-3-decision
 #   http://www.r-bloggers.com/a-brief-tour-of-the-trees-and-forests/
-##                          
+#   http://www.di.fc.ul.pt/~jpn/r/tree/tree.html
+# 
 #######################################################################################################
 
 # logistic regression models are not easily interpretable.
@@ -617,20 +634,110 @@ aucROCR
 # Some advantages of CART are that it does not assume a linear model, like logistic regression
 # or linear regression, and it's a very interpretable model.
 
+dev.off()
+
 # TREE package
 library(tree)
-tr <- tree(bad_loan ~ ., data=loan_train)
-summary(tr)
-plot(tr); text(tr)
-remove (tr)
 
-# RPART package
-library (rpart.plot)
-library(rpart)
-# only numeric values
-LoanTree = rpart (bad_loan~., control=rpart.control(minsplit=20),data=loan_train)
-prp(LoanTree)
+# http://plantecology.syr.edu/fridley/bio793/cart.html
 
+LoanTree.0 = tree (bad_loan~loan_amnt + annual_inc + dti + delinq_2yrs + revol_util +
+                     total_acc + longest_credit_length + bankrpc_state_low + emp_length +   
+                     bankrpc_state_high + homeown_mort + homeown_rent + homeown_other +
+                     term + purpose + vstatus_verified,
+                   control=tree.control(nobs=45016,mindev=.001),
+                   data=loan_train)
+
+plot(LoanTree.0) # default to 10 nodes
+text(LoanTree.0, cex=.75)   #cex reduces the default font size
+summary(LoanTree.0)
+
+# Do K-fold cross-validation using cv.tree() to find the "best" number of nodes for a tree:
+cv.model <- cv.tree(LoanTree.0)
+plot(cv.model)
+abline(v=3,col="red")
+
+# 3 results in the best fit
+cv.model.pruned <- prune.misclass(LoanTree.0, best=4)
+plot(cv.model.pruned)
+text(cv.model.pruned, cex=.75)  
+summary (cv.model.pruned)
+
+
+
+remove(cv.model)
+
+#### RPART ####
+
+# Begining with minsplit = 20, cp = 0 liberately ill-advised choices in building an rpart() classification tree 
+# Plotting the tree with plot() produces an a couple of black clouds, indicating we need to increase the
+# minsplit > 20. After some experimentation, minsplit = 750 was effective to reduce the tree
+# down to a manageable number of branches.
+
+LoanTree.1 = rpart (bad_loan~loan_amnt + annual_inc + dti + delinq_2yrs + revol_util +
+                      total_acc + longest_credit_length + bankrpc_state_low + emp_length +   
+                      bankrpc_state_high  + homeown_mort + homeown_rent + homeown_other +
+                      term + purpose + vstatus_verified,control=rpart.control(minsplit=750,cp=0),data=loan_train)
+
+summary(LoanTree.1)
+prp(LoanTree.1)                 # Will plot the tree
+
+# # Interatively prune the tree
+new.tree.1 <- prp(LoanTree.1,snip=TRUE)$obj # interactively trim the tree
+prp(new.tree.1) # display the new tree
+fancyRpartPlot(new.tree.1, main="RPart Tree for Indentifying Good Loan Candidates",sub="",palettes=c("Greys", "Oranges")) 
+
+
+# Instead of manually editing the tree, instead increase the minsplit variable to control the depth 
+
+LoanTree.2 = rpart (bad_loan~loan_amnt + annual_inc + dti + delinq_2yrs + revol_util +
+                      total_acc + longest_credit_length + bankrpc_state_low + emp_length +   
+                      bankrpc_state_high  + homeown_mort + homeown_rent + homeown_other +
+                      term + purpose + vstatus_verified,control=rpart.control(minsplit=2500,cp=0),data=loan_train)
+
+summary(LoanTree.2)
+
+prp(LoanTree.2) # display the new tree
+fancyRpartPlot(LoanTree.2, main="RPart Tree               ",sub="With Rpart controls minsplit = 2500 and plotted using fancyRpartPlot",palettes=c("Greys", "Oranges")) 
+
+# But what is the correct number of nodes to minimize overfitting?
+printcp(LoanTree.1)
+plotcp (LoanTree.1)
+
+# create additional plots
+par(mfrow=c(1,2)) # two plots on one page
+rsq.rpart(LoanTree.1) # visualize cross-validation results  
+abline(v=4,col="red")
+
+#conclusion, maxdepth = 4
+par(mfrow=c(1,1))  # switch back to one per page
+LoanTree.3 = rpart (bad_loan~loan_amnt + annual_inc + dti + delinq_2yrs + revol_util +
+                      total_acc + longest_credit_length + bankrpc_state_low + emp_length +   
+                      bankrpc_state_high  + homeown_mort + homeown_rent + homeown_other +
+                      term + purpose + vstatus_verified,control=rpart.control(maxdepth = 4,cp=0),data=loan_train)
+
+prp(LoanTree.3) # display the new tree
+fancyRpartPlot(LoanTree.3, main="RPart Tree               ",sub="With Rpart controls with maxdepth = 3. Plotted using fancyRpartPlot",palettes=c("Greys", "Blues")) 
+
+
+
+
+
+
+
+
+
+# http://blog.revolutionanalytics.com/2013/06/plotting-classification-and-regression-trees-with-plotrpart.html
+# in the "rattle" package in R
+# Each node box displays the classification, the probability of each class at that node (i.e. the probability of the class 
+# conditioned on the node) and the percentage of observations used at that node. Notice how the use of the dotted lines tends 
+# to emphasize the nodes and not the tree itself, and how having the bottom level of leaves line up helps the viewer to guess 
+# that the percentages in the node boxes indicate the percentage of observations that arrived at each node.
+
+library(rattle)
+fancyRpartPlot(LoanTree02, main="RPart Tree for Indentifying Good Loan Candidates",sub="",palettes=c("Greys", "Oranges")) 
+
+?fancyRpartPlot
 
 # Random Forest package
 # http://trevorstephens.com/post/73770963794/titanic-getting-started-with-r-part-5-random
@@ -679,7 +786,7 @@ varImpPlot(fit, sort = TRUE, type = 2, pch = 19, col = 1, cex = 1,
 Model_Results_Summary <- matrix (nrow=6, ncol =4)
 colnames(Model_Results_Summary) <- c("Model # and Type","AUC", "Var#", "Sample of Variables...")
 Model_Results_Summary [1,1] <- "Model 01 : Log Reg"
-Model_Results_Summary [1,2] <-  signif(auc00,digits=5)
+Model_Results_Summary [1,2] <-  signif(aucROCR,digits=5)
 Model_Results_Summary [1,3] <-  "14"
 Model_Results_Summary [1,4] <- "loan_amnt + annual_inc + dti + delinq_2yrs ....."
 
@@ -740,7 +847,7 @@ Model_Results_Summary [4,3] <-  "2"
 Model_Results_Summary [4,4] <- "annual_inc + term"
 
 
-LoanModel04a = glm (bad_loan ~ revol_util + dti + annual_inc + loan_amnt,
+LoanModel04a = glm (bad_loan ~ term + annual_inc + revol_util + dti + loan_amnt,
                     data=loan_train, family="binomial")
 
 predictTest = predict(LoanModel04a, type="response", newdata=loan_test)
@@ -752,8 +859,9 @@ auc
 
 Model_Results_Summary [5,1] <- "Model 04a: Rand Forest"
 Model_Results_Summary [5,2] <-  signif(auc,digits=5)
-Model_Results_Summary [5,3] <-  "4"
-Model_Results_Summary [5,4] <- "revol_util + dti + annual_inc + loan_amnt"
+Model_Results_Summary [5,3] <-  "5"
+Model_Results_Summary [5,4] <- "term + annual_inc + revol_util + dti + loan_amnt"
+
 
 LoanModel04b = glm (bad_loan ~ revol_util+ dti + annual_inc + loan_amnt + total_acc + annual_inc + longest_credit_length + emp_length,
                     data=loan_train, family="binomial")
@@ -802,7 +910,20 @@ ggplot(loan, aes(x = term, y = loan_amnt, fill = loan$bad_loan,
 
 ggplot(loan, aes(x = emp_length, y = loan_amnt)) + 
   geom_point() +
+  coord_cartesian(ylim = c(20000, 37500)) +
   facet_wrap(~bad_loan)
+
+ggplot(loan, aes(x = emp_length, y = loan_amnt)) + 
+  geom_jitter(alpha=1/10) +
+  coord_cartesian(ylim = c(20000, 37500)) +
+  facet_wrap(~bad_loan)
+
+ggplot(loan, aes(x = revol_util, y = loan_amnt)) + 
+  geom_jitter(alpha=1/10) +
+  coord_cartesian(ylim = c(20000, 37500),xlim = c(0,100)) +
+  facet_wrap(~bad_loan)
+
+
 
 ggplot(loan, aes(x = emp_length, y = loan_amnt)) + 
   geom_jitter() +
@@ -811,8 +932,6 @@ ggplot(loan, aes(x = emp_length, y = loan_amnt)) +
 ggplot(loan, aes(x = annual_inc, y = total_acc)) + 
   geom_jitter(alpha=1/20) +
   facet_wrap(~bad_loan)
-
-(alpha = 1/20, shape =  21, fill = I('#F79420'))
 
 
 LoanModel00 = glm (bad_loan ~ loan_amnt + annual_inc + dti + delinq_2yrs + revol_util +
